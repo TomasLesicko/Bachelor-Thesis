@@ -1,0 +1,362 @@
+[
+  {
+    "document": { "document": "n4296", "section": "15.3:3.1" },
+    "semantics": { "file": "semantics/cpp/language/execution/stmt/try.k", "line": "222" }
+  },
+  {
+    "document": { "document": "n4296", "section": "15.3:3.2" },
+    "semantics": { "file": "semantics/cpp/language/execution/stmt/try.k", "line": "229" }
+  },
+  {
+    "document": { "document": "n4296", "section": "15.3:3.3.1" },
+    "semantics": { "file": "semantics/cpp/language/execution/stmt/try.k", "line": "236" }
+  },
+  {
+    "document": { "document": "n4296", "section": "15.3:3.3.2" },
+    "semantics": { "file": "semantics/cpp/language/execution/stmt/try.k", "line": "253" }
+  },
+  {
+    "document": { "document": "n4296", "section": "15.3:3.4" },
+    "semantics": { "file": "semantics/cpp/language/execution/stmt/try.k", "line": "262" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.10:3.1-3.2" },
+    "semantics": { "file": "semantics/cpp/language/common/expr/relational.k", "line": "27" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.10:3.1-3.2" },
+    "semantics": { "file": "semantics/cpp/language/common/expr/relational.k", "line": "56" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.16:2.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/expr/conditional.k", "line": "62" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.16:2.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/expr/conditional.k", "line": "71" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.3.4/19" },
+    "semantics": { "file": "semantics/cpp/language/translation/expr/new.k", "line": "110" }
+  },
+  {
+    "document": { "document": "n4778", "section": "7.6.2.4/21" },
+    "semantics": { "file": "semantics/cpp/language/translation/expr/new.k", "line": "111" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.2.3:1" },
+    "semantics": { "file": "semantics/cpp/language/translation/expr/cast.k", "line": "30" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.2.3:2" },
+    "semantics": { "file": "semantics/cpp/language/translation/expr/cast.k", "line": "36" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.2.3:2" },
+    "semantics": { "file": "semantics/cpp/language/translation/typing/expr.k", "line": "158" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.2.3:1" },
+    "semantics": { "file": "semantics/cpp/language/translation/typing/expr.k", "line": "161" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.1.1.1:2" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "92" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.1.1.1:3" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "96" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.1.1.1:3" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "99" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.1.1.1:3" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "104" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.1.2:6" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "109" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.1.3:1" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "114" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.3.1.4:1" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "196" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.1:5.1-5.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "220" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.3.2:3.1.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "776" }
+  },
+  {
+    "document": { "document": "n4296", "section": "13.3.3.2:3.1.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/overloading.k", "line": "790" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.1:8.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "367" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.1:8.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "368" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.1:8.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "369" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.1:8.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "370" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.1:8.5" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "371" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.2:2.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "602" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.2:2.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "607" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.2:2.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "611" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.4.2:2.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/name.k", "line": "618" }
+  },
+  {
+    "document": { "document": "n4778", "section": "13.1/5" },
+    "semantics": { "file": "semantics/cpp/language/translation/stmt/try.k", "line": "60" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.2.3:2" },
+    "semantics": { "file": "semantics/cpp/language/translation/value-category.k", "line": "138" }
+  },
+  {
+    "document": { "document": "n4296", "section": "5.2.3:1" },
+    "semantics": { "file": "semantics/cpp/language/translation/value-category.k", "line": "141" }
+  },
+  {
+    "document": { "document": "N4296", "section": "3.2/3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "85" }
+  },
+  {
+    "document": { "document": "N4778", "section": "6.2/8" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "86" }
+  },
+  {
+    "document": { "document": "N4296", "section": "12.4/11" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "96" }
+  },
+  {
+    "document": { "document": "N4778", "section": "10.3.6/12" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "97" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.6-4.7" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "351" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "412" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "418" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "422" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "429" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.6.2:7" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "438" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.6.2:8.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "449" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.6.2:8.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "463" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.6.2:8.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "475" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.8" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "504" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.10" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "507" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.1:4.9,4.11" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "511" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.4:5" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "624" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.4:5.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "634" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.4:5.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "664" }
+  },
+  {
+    "document": { "document": "n4296", "section": "12.4:5.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/class.k", "line": "705" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:6.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "79" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:6.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "82" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:6.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "90" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:12" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "137" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:7.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "141" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:7.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "144" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:7.2-7.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "148" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:8.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "153" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:8.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "163" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:8.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "173" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:8.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "176" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:17.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "192" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:17.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "196" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:17.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "200" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:17.4" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "206" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:17.6.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "210" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5.4:3.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "241" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5.4:3.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "246" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5.4:3.5" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "252" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5.4:3.7" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/initializer.k", "line": "260" }
+  },
+  {
+    "document": { "document": "n4296", "section": "7.2/3:" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/enum.k", "line": "314" }
+  },
+  {
+    "document": { "document": "n4296", "section": "7.2/3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/enum.k", "line": "319" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:3.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "124" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:3.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "128" }
+  },
+  {
+    "document": { "document": "n4296", "section": "9.4.2:5" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "136" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:4" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "143" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:5" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "146" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:4" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "151" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:4.1" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "158" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:4.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "161" }
+  },
+  {
+    "document": { "document": "n4296", "section": "3.5:6" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "164" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5.4:3.2" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "419" }
+  },
+  {
+    "document": { "document": "n4296", "section": "8.5:17.3" },
+    "semantics": { "file": "semantics/cpp/language/translation/decl/declarator.k", "line": "429" }
+  }
+]
