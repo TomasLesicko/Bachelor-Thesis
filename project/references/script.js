@@ -27,18 +27,21 @@ var colorReferencedBlocks = function() {
     //         }
     // }
 
+    var faultyReferenceFormatCounter = 0;
     for(var i = 0; i < references.length; i++) {
-        var sectionInfo = references[i].document.section.split(':');
-        if (sectionInfo[0] === "5.16") {
-            var deb = 4;
+        var sectionInfo = references[i].document.section.split(/[:\/]+/); // supports 1.2:3 and 1.2/3
+
+        if (typeof(sectionInfo) == 'undefined' || sectionInfo.length < 2) {
+            ++faultyReferenceFormatCounter;
+            continue;
         }
 
-        //var HTMLpage = dictionary[sectionInfo[0]]+".html";
         var thisPage = location.pathname.split("/").slice(-1);
         var mappedSectionInfo;
         var color;
+
         if(references[i].document.document !== "n4820") {
-            mappedSectionInfo = mapping[references[i].document.document][sectionInfo[0]];
+            mappedSectionInfo = mapping[references[i].document.document.toLowerCase()][sectionInfo[0]];
             color = "#66ff66"
         } else {
             mappedSectionInfo = sectionInfo[0];
@@ -49,7 +52,17 @@ var colorReferencedBlocks = function() {
 
 
         if(HTMLpage === thisPage[0]) {
-            document.getElementById(sectionInfo[1]).style.backgroundColor = color;
+            var blocks = sectionInfo[1].split('-');
+            for (var j = 0; j < blocks.length; ++j) {
+                document.getElementById(blocks[j]).style.backgroundColor = color;
+            }
+
+            // document.getElementById(sectionInfo[1]).style.backgroundColor = color;
         }
     }
+
+    if (faultyReferenceFormatCounter > 0) {
+        alert(faultyReferenceFormatCounter + " faulty reference formats found.")
+    }
+
 };
