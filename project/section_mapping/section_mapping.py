@@ -2,6 +2,8 @@ import json
 import re
 from urllib.request import urlopen
 
+CURRENT_REVISION_TAG = "n4820"
+
 
 def extract_revision_tag_list_from_references(revision_set):
     with urlopen("https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
@@ -10,22 +12,17 @@ def extract_revision_tag_list_from_references(revision_set):
             revision_set.add(reference['document']['document'].lower())
 
 
-def read_current_revision_sections(regex_text_section_line, current):
-    with open("section_names_n4820.txt", 'r') as sections_text:
-        text = sections_text.read()
-        matches = re.findall(regex_text_section_line, text)
+def read_current_revision_sections(regex_expr, current):
+    with open("section_names_" + CURRENT_REVISION_TAG + ".txt", 'r') as sections_text:
+        matches = re.findall(regex_expr, sections_text.read())
         for tuple in matches:
             current[tuple[1]] = tuple[0]
             
-def map_revision_sections(regex_text_section_line, revision_set, current, older_revision_sections):
-    file_name = "section_names_"
-    file_suffix = ".txt"
-    
+            
+def map_revision_sections(regex_expr, revision_set, current, older_revision_sections):
     for revision_tag in revision_set:
-        
-        with open(file_name + revision_tag + file_suffix, 'r') as sections_text:
-            text = sections_text.read()
-            r = re.findall(regex_text_section_line, text)
+        with open("section_names_" + revision_tag + ".txt", 'r') as sections_text:
+            r = re.findall(regex_expr, sections_text.read())
             this_revision_sections = {}
             for tuple in r:
                 maps_to = current.get(tuple[1])
@@ -34,7 +31,7 @@ def map_revision_sections(regex_text_section_line, revision_set, current, older_
 
 
 def write_mapping(older_revision_sections):
-    with open("section_mapping_to_n4820.json", 'w') as sm:
+    with open("section_mapping_to_" + CURRENT_REVISION_TAG + ".json", 'w') as sm:
         json.dump(older_revision_sections, sm, indent = 4)
 
 
@@ -43,12 +40,13 @@ def main():
     current = {}
     older_revision_sections = {}
     
-    regex_text_section_line = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
+    regex_expr = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 
     extract_revision_tag_list_from_references(revision_set)
-    read_current_revision_sections(regex_text_section_line, current)
-    map_revision_sections(regex_text_section_line, revision_set, current, older_revision_sections)
+    read_current_revision_sections(regex_expr, current)
+    map_revision_sections(regex_expr, revision_set, current, older_revision_sections)
     write_mapping(older_revision_sections)
+
 
 if __name__ == "__main__":
     main()
