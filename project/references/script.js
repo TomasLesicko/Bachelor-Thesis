@@ -27,6 +27,7 @@ var colorReferencedBlocks = function() {
     //         }
     // }
 
+
     var faultyReferenceFormatCounter = 0;
     for(var i = 0; i < references.length; i++) {
         var sectionInfo = references[i].document.section.split(/[:\/]+/); // supports 1.2:3 and 1.2/3
@@ -42,7 +43,7 @@ var colorReferencedBlocks = function() {
 
         if(references[i].document.document !== "n4820") {
             mappedSectionInfo = mapping[references[i].document.document.toLowerCase()][sectionInfo[0]];
-            color = "#66ff66"
+            color = "#66ff66";
         } else {
             mappedSectionInfo = sectionInfo[0];
             color = "#009933";
@@ -55,9 +56,17 @@ var colorReferencedBlocks = function() {
             var blocks = sectionInfo[1].split('-');
             for (var j = 0; j < blocks.length; ++j) {
                 document.getElementById(blocks[j]).style.backgroundColor = color;
+
+                //semantics comments
+                document.getElementById(blocks[j]).setAttribute('title', "file: " +
+                    references[i].semantics.file + " ,line: " + references[i].semantics.line);
             }
 
             // document.getElementById(sectionInfo[1]).style.backgroundColor = color;
+        }
+
+        if (i === references.length - 2) {
+            var xyz = 4;
         }
     }
 

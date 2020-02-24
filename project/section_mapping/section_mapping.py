@@ -6,6 +6,13 @@ CURRENT_REVISION_TAG = "n4820"
 
 
 def extract_revision_tag_list_from_references(revision_set):
+    """Store all revision tags from references to revision_set.
+
+    The references in references.json are extracted from different C++ 
+    standard revisions (e.g. n.4140, n4296...). This function finds all
+    used tags and stores them to revision_set.
+    revision_set -- set containing all revision tags from references
+    """
     with urlopen("https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
         references = json.loads(url.read())
         for reference in references:
