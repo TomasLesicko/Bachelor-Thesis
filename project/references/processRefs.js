@@ -1,14 +1,14 @@
 //TODO section names file and section mapping file names will change depending on revision, fetching needs to work regardless of current revision
 
-var processRefs = function() {
+(function() {
     "use strict";
 
-    function processLine(line, dict, regex){
+    function processLine(line, dict, regex) {
         var splitLine = line.split(regex);
         dict[splitLine[0]] = splitLine[1];
     }
 
-    function getProcessedSectionNames(sectionNamesFile){
+    function getProcessedSectionNames(sectionNamesFile) {
         /*
         sectionNamesFile is in the following format:
         "chapter.subchapter: html.name - Name\n" e.g.:
@@ -51,4 +51,4 @@ var processRefs = function() {
 
 
     fetchFiles();
-};
+}());
