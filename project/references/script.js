@@ -1,31 +1,61 @@
-'use strict';
+(function() {
+    "use strict";
 
-var colorReferencedBlocks = function() {
+    const currentRevision = "n4820";
 
     var dictionary = JSON.parse(sessionStorage.getItem('dictionary'));
     var references = JSON.parse(sessionStorage.getItem('references'));
     var mapping = JSON.parse(sessionStorage.getItem('mapping'));
 
     var thisPage = location.pathname.split("/").slice(-1);
-
     var faultyReferenceFormatCounter = 0;
-    for(var i = 0; i < references.length; i++) {
-        var section = references[i].document.section.split(/[:\/]+/); // supports 1.2:3 and 1.2/3
 
-        if (typeof(section) == 'undefined' || section.length < 2) {
+
+    function isValidReference(section) {
+        /*
+        section must be a valid value and consist of a chapter index
+        and at least one section id
+         */
+        return section && section.length >= 2;
+    }
+
+    function getReferenceComment(reference) {
+        return reference.semantics.file + ", line: " +
+            reference.semantics.line;
+    }
+
+    function handleFaultyReferences() {
+        //TODO different alerts for diferent problems
+        if (faultyReferenceFormatCounter > 0) {
+            alert(faultyReferenceFormatCounter + " faulty reference formats found.")
+        }
+    }
+
+    function highlightReferencedSections() {
+        references.forEach((reference) => {
+            highlightRelevantSection(reference, dictionary, mapping);
+        });
+
+        handleFaultyReferences();
+    }
+
+    function highlightRelevantSection(reference, dictionary, mapping) {
+        var section = reference.document.section.split(/[:\/]+/); // supports 1.2:3 and 1.2/3
+
+        if (!isValidReference(section)) {
             ++faultyReferenceFormatCounter;
-            continue;
+            return;
         }
 
         var mappedSectionInfo;
         var color;
 
-        if(references[i].document.document !== "n4820") {
-            mappedSectionInfo = mapping[references[i].document.document.toLowerCase()][section[0]];
-            color = "#66ff66";
-        } else {
+        if(reference.document.document === currentRevision) {
             mappedSectionInfo = section[0];
             color = "#009933";
+        } else {
+            mappedSectionInfo = mapping[reference.document.document.toLowerCase()][section[0]];
+            color = "#66ff66";
         }
 
         var HTMLpage = dictionary[mappedSectionInfo]+".html";
@@ -37,18 +67,11 @@ var colorReferencedBlocks = function() {
                 document.getElementById(blocks[j]).style.backgroundColor = color;
 
                 //semantics comments
-                document.getElementById(blocks[j]).setAttribute('title', "file: " +
-                    references[i].semantics.file + " ,line: " + references[i].semantics.line);
+                document.getElementById(blocks[j]).title = getReferenceComment(reference);
             }
         }
-
-        if (i === references.length - 2) {
-            var xyz = 4;
-        }
     }
 
-    if (faultyReferenceFormatCounter > 0) {
-        alert(faultyReferenceFormatCounter + " faulty reference formats found.")
-    }
 
-};
+    highlightReferencedSections();
+}());
