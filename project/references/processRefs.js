@@ -1,26 +1,54 @@
-'use strict';
+//TODO section names file and section mapping file names will change depending on revision, fetching needs to work regardless of current revision
 
 var processRefs = function() {
+    "use strict";
 
-    jQuery.get('https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json', function(data) {
-        sessionStorage.setItem('references', data);
-    });
+    function processLine(line, dict, regex){
+        var splitLine = line.split(regex);
+        dict[splitLine[0]] = splitLine[1];
+    }
 
-    jQuery.get('https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/section_names_n4820.txt', function(data) {
+    function getProcessedSectionNames(sectionNamesFile){
+        /*
+        sectionNamesFile is in the following format:
+        "chapter.subchapter: html.name - Name\n" e.g.:
+        "5.12: lex.operators - Operators and punctuators\n"
+
+        returns a dict with k=chapters, v=html names, full names are redundant
+         */
+
         var sectionNamesDict = {};
-        var lines = data.split('\n');
+        var lines = sectionNamesFile.split("\n");
 
-        for(var i = 0; i < lines.length; i++) {
-            var splitLine = lines[i].split(/:\s|\s-\s/);
-            sectionNamesDict[splitLine[0]] = splitLine[1];
+        lines.forEach((line) =>
+            processLine(line, sectionNamesDict, /:\s|\s-\s/)
+        );
 
-            //var splitLine = lines[i].split(" ");
-            //sectionNamesDict[splitLine[0].slice(0, -1)] = splitLine[1];
-        }
-        sessionStorage.setItem('dictionary', JSON.stringify(sectionNamesDict));
-    });
+        return sectionNamesDict;
+    }
 
-    jQuery.get('https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/section_mapping/section_mapping_to_n4820.json', function(data) {
-        sessionStorage.setItem('mapping', data);
-    });
+    function fetchFiles() {
+        jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
+            "Bachelor-Thesis/master/project/references/references.json",
+            function(data) {
+            sessionStorage.setItem("references", data);
+        });
+
+        jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
+            "Bachelor-Thesis/master/project/references/section_names_n4820.txt",
+            function(data) {
+            sessionStorage.setItem("dictionary",
+                JSON.stringify(getProcessedSectionNames(data)));
+        });
+
+        jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
+            "Bachelor-Thesis/master/project/section_mapping/" +
+            "section_mapping_to_n4820.json",
+            function(data) {
+            sessionStorage.setItem("mapping", data);
+        });
+    }
+
+
+    fetchFiles();
 };
