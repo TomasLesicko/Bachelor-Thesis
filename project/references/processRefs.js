@@ -3,12 +3,14 @@
 (function() {
     "use strict";
 
+    const sectionNamesProcessingRegex = /:\s|\s-\s/;
+
     function processLine(line, dict, regex) {
-        var splitLine = line.split(regex);
+        let splitLine = line.split(regex);
         dict[splitLine[0]] = splitLine[1];
     }
 
-    function getProcessedSectionNames(sectionNamesFile) {
+    function processSectionNames(sectionNamesFile) {
         /*
         sectionNamesFile is in the following format:
         "chapter.subchapter: html.name - Name\n" e.g.:
@@ -17,11 +19,11 @@
         returns a dict with k=chapters, v=html names, full names are redundant
          */
 
-        var sectionNamesDict = {};
-        var lines = sectionNamesFile.split("\n");
+        let sectionNamesDict = {};
+        let lines = sectionNamesFile.split("\n");
 
         lines.forEach((line) =>
-            processLine(line, sectionNamesDict, /:\s|\s-\s/)
+            processLine(line, sectionNamesDict, sectionNamesProcessingRegex)
         );
 
         return sectionNamesDict;
@@ -38,7 +40,7 @@
             "Bachelor-Thesis/master/project/references/section_names_n4820.txt",
             function(data) {
             sessionStorage.setItem("dictionary",
-                JSON.stringify(getProcessedSectionNames(data)));
+                 JSON.stringify(processSectionNames(data)));
         });
 
         jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
