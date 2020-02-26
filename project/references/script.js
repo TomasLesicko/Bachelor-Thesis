@@ -20,10 +20,10 @@
                 getHighlightColor(revisionTag));
     }
 
-    function displaySemanticsComments(semantics, commentedSections) {
+    function displaySemanticsComments(reference, commentedSections) {
         commentedSections.forEach((section) =>
             document.getElementById(section).title =
-                getReferenceComment(semantics));
+                getReferenceComment(reference));
     }
 
     function getHighlightColor(revisionTag) {
@@ -31,8 +31,10 @@
             currentRevisionTagColor : differentRevisionTagColor;
     }
 
-    function getReferenceComment(semantics) {
-        return semantics.file + ", line: " + semantics.line;
+    function getReferenceComment(reference) {
+        return reference.document.document + ", " +
+            reference.document.section + ", (current "
+            + currentRevisionTag + ")\n" + JSON.stringify(reference.semantics);
     }
 
     function handleFaultyReferences() {
@@ -71,7 +73,7 @@
             let sections = chapterAndSections[1].split("-");
 
             colorRelevantSections(reference.document.document, sections);
-            displaySemanticsComments(reference.semantics, sections);
+            displaySemanticsComments(reference, sections);
         }
     }
 
