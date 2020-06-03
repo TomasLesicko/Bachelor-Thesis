@@ -2,7 +2,7 @@ import json
 import re
 from urllib.request import urlopen
 
-CURRENT_REVISION_TAG = "n4820"
+CURRENT_REVISION_TAG = "n4778"
 
 
 def extract_revision_tag_list_from_references(revision_set):
@@ -19,7 +19,7 @@ def extract_revision_tag_list_from_references(revision_set):
             revision_set.add(reference['document']['document'].lower())
 
 
-def read_current_revision_sections(regex_expr, current):
+def read_target_revision_sections(regex_expr, current):
     with open("section_names_" + CURRENT_REVISION_TAG + ".txt", 'r') as sections_text:
         matches = re.findall(regex_expr, sections_text.read())
         for tuple in matches:
@@ -50,7 +50,7 @@ def main():
     regex_expr = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 
     extract_revision_tag_list_from_references(revision_set)
-    read_current_revision_sections(regex_expr, current)
+    read_target_revision_sections(regex_expr, current)
     map_revision_sections(regex_expr, revision_set, current, older_revision_sections)
     write_mapping(older_revision_sections)
 
