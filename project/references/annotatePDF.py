@@ -17,64 +17,68 @@ def findSectionPage(doc, section):
         blocks = page.getTextBlocks(flags=fitz.TEXT_INHIBIT_SPACES)
         for block in blocks:
             regex_results = re.search(regex, block[4])
-            # if(regex_results):
-            #    print("Chapter " + str(regex_results[1]) + " is on page " + str(regex_results[2]))
-            # else:
-            #    print("failed")
+
             if regex_results and regex_results[1] == str(section):
                 return regex_results[2]
 
 
-def annotateReference(doc, ref):
+def findReferencedSection(doc, ref):  # TODO search next page if section not on current page
     section = ref["document"]["section"].split(":")
-    pageNum = int(findSectionPage(section[0]))
+    pageNum = int(findSectionPage(doc, section[0]))
     # page = doc[contentPages + pageNum - 1]
     page = doc[23]  # temp for test PDF
 
+    return [section, page]
 
-def annotate(doc):
-    references = json.load(open("referencesSmall.json")) # TEMP, change to references
+
+def highlightSection(page, rect):
+    annot = page.addHighlightAnnot(rect)
+    annot.setColors(stroke=(0, 0.7, 0))
+    print("highlighted the section")
+
+def annotateSection(page, rect, ref):
+    annot = page.addTextAnnot((rect[2] + commentInfoIconOffsetX, rect[1]), ref["semantics"]["file"],
+                              "Comment")
+    annot.setColors(stroke=(0, 0.8, 0))
+    annot.update()
+    print("annotated the section")
+
+def processReference(doc, ref):
+    section, page = findReferencedSection(doc, ref)
+    blocks = page.getTextBlocks(flags=fitz.TEXT_INHIBIT_SPACES)
+    regex = "\(" + section[1] + "\)"
+
+    for block in blocks:
+        result = re.search(regex, block[4])
+
+        if result:
+            print("found the correct block" + str(block[4]))
+            rect = [block[0], block[1], block[2], block[3]]
+
+            highlightSection(page, rect)
+            annotateSection(page, rect, ref)
+
+def annotateDocument(doc):
+    print("processing references")
+    references = json.load(open("referencesSmall.json"))  # TEMP, change to references
     for ref in references:
-        # annotateReference(doc, ref)
-        section = ref["document"]["section"].split(":")
-        pageNum = int(findSectionPage(doc, section[0]))
-        # page = doc[contentPages + pageNum - 1]
-        page = doc[23]  # temp for test PDF
-        blocks = page.getTextBlocks(flags=fitz.TEXT_INHIBIT_SPACES)
-        # print(blocks)
-        # print("found section " + str(section[0]) + " on page " + str(pageNum))
-
-        for block in blocks:
-            reg = "\(" + section[1] + "\)"
-            result = re.search(reg, block[4])
-            # if section[1] in block[4]: # gonna need regex here
-            if result:
-                print("found the correct block" + str(block[4]))
-                rect = [block[0], block[1], block[2], block[3]]
-                annot = page.addHighlightAnnot(rect)
-                annot.setColors(stroke=(0, 0.7, 0))
-                annot = page.addTextAnnot((rect[2] + commentInfoIconOffsetX, rect[1]), ref["semantics"]["file"],
-                                          "Comment")
-                annot.setColors(stroke=(0, 0.8, 0))
-                annot.update()
-                print("annotated the block")
+        processReference(doc, ref)
 
     print("saving document")
     doc.save("n4296_except.pdf", garbage=4, deflate=True, clean=True)
 
+
 def main(argv):
     try:
-        # os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/', argv[1])
         path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/',
-                                             argv[1].lower())
-        #path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'WebstormProjects/PDF/',
+                            argv[1].lower())
+        # path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'WebstormProjects/PDF/',
         #                                     argv[1].lower())
         if path[-4:].lower() != ".pdf":
             path += ".pdf"
         originalPDF = fitz.open(path)
-        annotate(originalPDF)
+        annotateDocument(originalPDF)
     except (RuntimeError, IndexError):
-        # print("Usage: annotatePDF.py <tag>")
         print("Usage: \"annotatePDF.py <tag>\"\ne.g. \"annotatePDF.py n4296\"")
 
 
