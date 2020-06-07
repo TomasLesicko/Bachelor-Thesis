@@ -1,11 +1,13 @@
 import json
 import re
 from urllib.request import urlopen
+import sys
 
 import chapter_extractor
 
 SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 FILE_SHARED_NAME = "secton_names_"
+
 
 def extract_revision_tag_list_from_references(revision_set):
     """Store all revision tags from references to revision_set.
@@ -15,7 +17,8 @@ def extract_revision_tag_list_from_references(revision_set):
     used tags and stores them to revision_set.
     revision_set -- set containing all revision tags from references
     """
-    with urlopen("https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
+    with urlopen(
+            "https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
         references = json.loads(url.read())
         for reference in references:
             revision_set.add(reference['document']['document'].lower())
@@ -33,8 +36,8 @@ def read_target_revision_sections(target_tag, regex, current, allow_recursion=Tr
             tag_dict = {target_tag}
             chapter_extractor.extract_relevant_revision_sections(tag_dict)
             read_target_revision_sections(target_tag, regex, current, False)
-            
-            
+
+
 def map_revision_sections(revision_set, current, older_revision_sections, allow_recursion=True):
     for revision_tag in revision_set:
         try:
@@ -54,7 +57,7 @@ def map_revision_sections(revision_set, current, older_revision_sections, allow_
 
 def write_mapping(older_revision_sections, target_tag):
     with open("section_mapping_to_" + target_tag + ".json", 'w') as sm:
-        json.dump(older_revision_sections, sm, indent = 4)
+        json.dump(older_revision_sections, sm, indent=4)
 
 
 def main(argv):
@@ -69,4 +72,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(argv)
+    main(sys.argv)
