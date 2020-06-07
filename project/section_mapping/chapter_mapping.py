@@ -6,7 +6,6 @@ import sys
 import chapter_extractor
 
 SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
-FILE_SHARED_NAME = "section_names_"
 
 
 def extract_revision_tag_list_from_references(revision_set):
@@ -26,13 +25,13 @@ def extract_revision_tag_list_from_references(revision_set):
 
 def read_target_revision_sections(target_tag, current, allow_recursion=True):
     try:
-        with open(FILE_SHARED_NAME + target_tag + ".txt", 'r') as sections_text:
+        with open(chapter_extractor.SECTION_FILE_SHARED_NAME + target_tag + ".txt", 'r') as sections_text:
             matches = re.findall(SECTIONS_LINE_PARSING_REGEX, sections_text.read())
             for section_tuple in matches:
                 current[section_tuple[1]] = section_tuple[0]
     except FileNotFoundError:
         if allow_recursion:
-            print("Could not find file " + FILE_SHARED_NAME + target_tag + ".txt, attempting to create it")
+            print("Could not find file " + chapter_extractor.SECTION_FILE_SHARED_NAME + target_tag + ".txt, attempting to create it")
             tag_dict = {target_tag}
             chapter_extractor.extract_relevant_revision_sections(tag_dict)
             read_target_revision_sections(target_tag, current, False)
@@ -41,7 +40,7 @@ def read_target_revision_sections(target_tag, current, allow_recursion=True):
 def map_revision_sections(revision_set, current, older_revision_sections, allow_recursion=True):
     for revision_tag in revision_set:
         try:
-            with open(FILE_SHARED_NAME + revision_tag + ".txt", 'r') as sections_text:
+            with open(chapter_extractor.SECTION_FILE_SHARED_NAME + revision_tag + ".txt", 'r') as sections_text:
                 regex_results = re.findall(SECTIONS_LINE_PARSING_REGEX, sections_text.read())
                 this_revision_sections = {}
                 for section_tuple in regex_results:
