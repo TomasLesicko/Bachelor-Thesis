@@ -18,17 +18,17 @@ def extract_relevant_revision_sections(revision_tags):
         os.chdir("source")
 
         try:
-            subprocess.run("./a.out std.tex > " + SECTION_FILE_SHARED_NAME + tag + ".txt", shell=True, check=True)
+            subprocess.run("./a.out std.tex > %s%s.txt" % (SECTION_FILE_SHARED_NAME, tag), shell=True, check=True)
 
         except subprocess.CalledProcessError as cpe:
             print("sections.cpp has to be compiled in draft/source\n"
                   "in draft/source, \"g++ ../tools/sections.cpp\"")
-            subprocess.run("rm -f " + SECTION_FILE_SHARED_NAME + tag + ".txt", shell=True, check=True)
+            subprocess.run("rm -f %s%s.txt" % (SECTION_FILE_SHARED_NAME, tag), shell=True, check=True)
             repo.checkout("master")
             os.chdir(old)
             raise cpe
 
-        subprocess.run("mv " + SECTION_FILE_SHARED_NAME + tag + ".txt ../../project/section_mapping/", shell=True, check=True)
+        subprocess.run("mv %s%s.txt ../../project/section_mapping/" % (SECTION_FILE_SHARED_NAME, tag), shell=True, check=True)
         os.chdir("..")
 
     repo.checkout("master")
