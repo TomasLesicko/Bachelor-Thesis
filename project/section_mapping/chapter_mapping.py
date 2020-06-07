@@ -6,7 +6,7 @@ import sys
 import chapter_extractor
 
 SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
-FILE_SHARED_NAME = "secton_names_"
+FILE_SHARED_NAME = "section_names_"
 
 
 def extract_revision_tag_list_from_references(revision_set):
@@ -24,18 +24,18 @@ def extract_revision_tag_list_from_references(revision_set):
             revision_set.add(reference['document']['document'].lower())
 
 
-def read_target_revision_sections(target_tag, regex, current, allow_recursion=True):
+def read_target_revision_sections(target_tag, current, allow_recursion=True):
     try:
         with open(FILE_SHARED_NAME + target_tag + ".txt", 'r') as sections_text:
-            matches = re.findall(regex, sections_text.read())
-            for tuple in matches:
-                current[tuple[1]] = tuple[0]
+            matches = re.findall(SECTIONS_LINE_PARSING_REGEX, sections_text.read())
+            for section_tuple in matches:
+                current[section_tuple[1]] = section_tuple[0]
     except FileNotFoundError:
         if allow_recursion:
             print("Could not find file " + FILE_SHARED_NAME + target_tag + ".txt, attempting to create it")
             tag_dict = {target_tag}
             chapter_extractor.extract_relevant_revision_sections(tag_dict)
-            read_target_revision_sections(target_tag, regex, current, False)
+            read_target_revision_sections(target_tag, current, False)
 
 
 def map_revision_sections(revision_set, current, older_revision_sections, allow_recursion=True):
@@ -44,9 +44,9 @@ def map_revision_sections(revision_set, current, older_revision_sections, allow_
             with open(FILE_SHARED_NAME + revision_tag + ".txt", 'r') as sections_text:
                 regex_results = re.findall(SECTIONS_LINE_PARSING_REGEX, sections_text.read())
                 this_revision_sections = {}
-                for tuple in regex_results:
-                    maps_to = current.get(tuple[1])
-                    this_revision_sections[tuple[0]] = maps_to
+                for section_tuple in regex_results:
+                    maps_to = current.get(section_tuple[1])
+                    this_revision_sections[section_tuple[0]] = maps_to
                 older_revision_sections[revision_tag] = this_revision_sections
         except FileNotFoundError:
             if allow_recursion:
@@ -60,15 +60,25 @@ def write_mapping(older_revision_sections, target_tag):
         json.dump(older_revision_sections, sm, indent=4)
 
 
-def main(argv):
-    revision_set = set()
-    current = {}
-    older_revision_sections = {}
+def is_valid_revision(name):
+    valid = r"^n\d{4}$"
+    return re.search(valid, name.lower())
 
-    extract_revision_tag_list_from_references(revision_set)
-    read_target_revision_sections(SECTIONS_LINE_PARSING_REGEX, current)
-    map_revision_sections(revision_set, current, older_revision_sections)
-    write_mapping(older_revision_sections)
+
+def main(argv):
+
+    if len(argv) != 2 or not is_valid_revision(argv[1]):
+        print("Usage: \"chapter_mapping.py <tag>\"\ne.g. \"chapter_mapping.py n4296\"")
+    else:
+
+        revision_set = set()
+        current = {}
+        older_revision_sections = {}
+
+        extract_revision_tag_list_from_references(revision_set)
+        read_target_revision_sections(argv[1], current)
+        map_revision_sections(revision_set, current, older_revision_sections)
+        write_mapping(older_revision_sections, argv[1])
 
 
 if __name__ == "__main__":
