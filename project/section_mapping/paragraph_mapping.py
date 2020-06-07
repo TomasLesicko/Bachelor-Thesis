@@ -14,7 +14,7 @@ import chapter_mapping
     exist, create it via chapter extractor
 - edit the entry a bit so it fits regex
 - use regex to find the chapter and extract it with regex like
-    "13.3 Handling an exception \[except.handle\][\s\S]*\d+\.\d+ (\w+ )+\[\w+\.\w+\]"
+    "13.3 Handling an exception \[except.handle\][\s\S]*\d+\.\d+ (\w+ )+\[\w+\.\w+\]" .* re.DOTALL should work nstead [\s\S]
     the second part could just be the chapter that follows, should be easy to find from chapter
     names file
 - now another regex that finds the referenced paragraph from section id, extracts it
