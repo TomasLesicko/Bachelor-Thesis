@@ -82,12 +82,15 @@ def read_referenced_revisions(revision_set):
 
     return revisions_text_dict
 
-
-def extract_chapter_text(revision_text, identifier):
-    regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]" # spaces instead of newlines near the end, the title is always in one line
+# r"\[" + re.escape(identifier) + r"\][\s\S]+?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
+def extract_chapter_text(revision_text, identifier, paragraph_id):
+    regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?\n—?\(?"\
+            + re.escape(paragraph_id) + "\)?([\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]" # spaces instead of newlines near the end, the title is always in one line
     result = re.findall(regex, revision_text) # TODO check edge cases (EOF...)
+    if result is None or len(result) != 1:
+        handleTHIS = "TODO"
 
-    return result
+    return result[0]
 
 
 def find_referenced_text(revision_text, referenced_revision_tag,
@@ -97,7 +100,7 @@ def find_referenced_text(revision_text, referenced_revision_tag,
             regex = re.escape(referenced_chapter) + r": (\S+) - (.+)"
             referenced_section_identifiers = re.search(regex, f.read())
             if referenced_section_identifiers:
-                extract_chapter_text(revision_text, referenced_section_identifiers[1])
+                chapter_text = extract_chapter_text(revision_text, referenced_section_identifiers[1], referenced_paragraph)
             else:
                 return
                 # TODO error handling

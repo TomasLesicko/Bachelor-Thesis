@@ -16,8 +16,8 @@ def load_references():
             references = json.loads(url.read())
             return references
     except URLError as urle:
-        # TODO attempt to open references locally
         print(urle)
+        print("Failed to retrieve references.json from GitHub repository")
         return {}
 
 
