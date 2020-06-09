@@ -1,5 +1,6 @@
 import json
 import re
+from urllib.error import URLError
 from urllib.request import urlopen
 import sys
 
@@ -8,7 +9,19 @@ import chapter_extractor
 SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 
 
-def extract_revision_tag_list_from_references(revision_set):
+def load_references():
+    try:
+        with urlopen(
+                "https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
+            references = json.loads(url.read())
+            return references
+    except URLError as urle:
+        # TODO attempt to open references locally
+        print(urle)
+        return {}
+
+
+def extract_revision_tag_list_from_references(references, revision_set):
     """Store all revision tags from references to revision_set.
 
     The references in references.json are extracted from different C++ 
@@ -16,11 +29,8 @@ def extract_revision_tag_list_from_references(revision_set):
     used tags and stores them to revision_set.
     revision_set -- set containing all revision tags from references
     """
-    with urlopen(
-            "https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
-        references = json.loads(url.read())
-        for reference in references:
-            revision_set.add(reference['document']['document'].lower())
+    for reference in references:
+        revision_set.add(reference['document']['document'].lower())
 
 
 def read_target_revision_sections(target_tag, current, allow_recursion=True):

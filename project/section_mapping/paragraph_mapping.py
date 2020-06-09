@@ -7,6 +7,7 @@ import json
 import chapter_extractor
 import chapter_mapping
 
+SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 
 """
 - find all tags in refs + target ref tag, then open the contents in tika and save it in a dictionary
@@ -64,13 +65,34 @@ def map_paragraphs_to_target_revision(references, target_tag):
             #perhaps find tags, then create a dictionary containing loaded contents of all revisions
             search_paragraph_by_section_id(reference["document"]["section"], contents)
 
+def read_referenced_revisions(revision_set):
+    revisions_text_dict = {}
+
+    for revision_tag in revision_set:
+        path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/',
+                            revision_tag.lower() + ".pdf")
+        try:
+            contents = parser.from_file(path)["content"]
+            revisions_text_dict[revision_tag] = contents
+        except FileNotFoundError as fnfe:
+            print(fnfe)
+            print("Could not find revision %s in draft/papers" % revision_tag)
+
+    return revisions_text_dict
+
 
 def main(argv):
     try:
         revision_set = set()
-        revision_set.add(argv[1])
+        revision_set.add(argv[1]) # add target revision tag to the set
 
         chapter_mapping.extract_revision_tag_list_from_references(revision_set)
+
+        revisions_text_dict = read_referenced_revisions(revision_set)
+
+
+        # if chapter_mapping_to_target doesn't exist. create it
+
 
 
 
@@ -87,7 +109,7 @@ def main(argv):
 
     except (RuntimeError, IndexError, FileNotFoundError) as e:
         print(e)
-        print("Usage: \"annotatePDF.py <tag>\"\ne.g. \"annotatePDF.py n4296\"")
+        print("Usage: \"paragraphMapping.py <tag>\"\ne.g. \"paragraphMapping.py n4296\"")
 
 
 if __name__ == "__main__":
