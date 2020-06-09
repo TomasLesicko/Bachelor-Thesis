@@ -6,7 +6,7 @@ import sys
 
 import chapter_extractor
 
-SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
+SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:.+)\n'
 
 
 def load_references():
@@ -83,8 +83,9 @@ def main(argv):
         revision_set = set()
         current = {}
         older_revision_sections = {}
+        references = load_references()
 
-        extract_revision_tag_list_from_references(revision_set)
+        extract_revision_tag_list_from_references(references, revision_set)
         read_target_revision_sections(argv[1], current)
         map_revision_sections(revision_set, current, older_revision_sections)
         write_mapping(older_revision_sections, argv[1])

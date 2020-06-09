@@ -29,6 +29,7 @@ SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 -not sure what to do if the paragraph was moved to a different chapter
 """
 
+
 def read_target_revision_sections(regex_expr, current):
     with open("section_names_" + CURRENT_REVISION_TAG + ".txt", 'r') as sections_text:
         matches = re.findall(regex_expr, sections_text.read())
@@ -59,11 +60,12 @@ def search_paragraph_by_section_id(section_id, contents):
 def map_paragraphs_to_target_revision(references, target_tag):
     for reference in references:
         referenced_tag = reference["document"]["document"]
-        if  referenced_tag.lower() != target_tag.lower():
+        if referenced_tag.lower() != target_tag.lower():
             path = os.path.join(os.path.dirname(__file__), referenced_tag.lower() + ".pdf")
-            contents = parser.from_file(path)["content"] #can't do this too inefficient
-            #perhaps find tags, then create a dictionary containing loaded contents of all revisions
+            contents = parser.from_file(path)["content"]  # can't do this too inefficient
+            # perhaps find tags, then create a dictionary containing loaded contents of all revisions
             search_paragraph_by_section_id(reference["document"]["section"], contents)
+
 
 def read_referenced_revisions(revision_set):
     revisions_text_dict = {}
@@ -81,20 +83,54 @@ def read_referenced_revisions(revision_set):
     return revisions_text_dict
 
 
+def extract_chapter_text(revision_text, identifier):
+    regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]" # spaces instead of newlines near the end, the title is always in one line
+    result = re.findall(regex, revision_text) # TODO check edge cases (EOF...)
+
+    return result
+
+
+def find_referenced_text(revision_text, referenced_revision_tag,
+                         referenced_chapter, referenced_paragraph):
+    try:
+        with open("%s%s.txt" % (chapter_extractor.SECTION_FILE_SHARED_NAME, referenced_revision_tag), 'r') as f:
+            regex = re.escape(referenced_chapter) + r": (\S+) - (.+)"
+            referenced_section_identifiers = re.search(regex, f.read())
+            if referenced_section_identifiers:
+                extract_chapter_text(revision_text, referenced_section_identifiers[1])
+            else:
+                return
+                # TODO error handling
+    except:
+        return
+        # TODO error handling
+
+
+def process_referenced_paragraphs(references, revisions_text_dict):
+    for reference in references:
+        referenced_revision_tag = reference["document"]["document"].lower()
+        referenced_section = reference["document"]["section"].split(':')
+        if referenced_section is None or len(referenced_section) != 2:
+            print("Faulty reference")  # TODO error
+        referenced_chapter = referenced_section[0]
+        referenced_paragraph = referenced_section[1]
+
+        referenced_text = find_referenced_text(revisions_text_dict[referenced_revision_tag], referenced_revision_tag,
+                                               referenced_chapter, referenced_paragraph)
+
+
 def main(argv):
     try:
         revision_set = set()
-        revision_set.add(argv[1]) # add target revision tag to the set
+        revision_set.add(argv[1])  # add target revision tag to the set
+        references = chapter_mapping.load_references()
 
-        chapter_mapping.extract_revision_tag_list_from_references(revision_set)
-
+        chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
         revisions_text_dict = read_referenced_revisions(revision_set)
 
+        process_referenced_paragraphs(references, revisions_text_dict)
 
         # if chapter_mapping_to_target doesn't exist. create it
-
-
-
 
         path = os.path.join(os.path.dirname(__file__), argv[1])
         # path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/', argv[1])
