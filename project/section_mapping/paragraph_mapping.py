@@ -8,6 +8,8 @@ import chapter_extractor
 import chapter_mapping
 
 SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
+REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?))"
+# REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=\1)"
 
 """
 - find all tags in refs + target ref tag, then open the contents in tika and save it in a dictionary
@@ -84,13 +86,18 @@ def read_referenced_revisions(revision_set):
 
 # r"\[" + re.escape(identifier) + r"\][\s\S]+?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
 def extract_chapter_text(revision_text, identifier, paragraph_id):
-    regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?\n—?\(?"\
-            + re.escape(paragraph_id) + "\)?([\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]" # spaces instead of newlines near the end, the title is always in one line
+    # regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?\n—?\(?"\
+    #         + re.escape(paragraph_id) + "\)?([\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]" # spaces instead of newlines near the end, the title is always in one line
+    regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?(?:[\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
+    # regex2 = r"(?:—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
+    regex2 = r"(?:—?\(?((?:^|\(|\—)" + re.escape(paragraph_id) + r")\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
+
     result = re.findall(regex, revision_text) # TODO check edge cases (EOF...)
+    result2 = re.findall(regex2, result[0], re.M)
     if result is None or len(result) != 1:
         handleTHIS = "TODO"
 
-    return result[0]
+    return result2[0]
 
 
 def find_referenced_text(revision_text, referenced_revision_tag,
@@ -100,7 +107,7 @@ def find_referenced_text(revision_text, referenced_revision_tag,
             regex = re.escape(referenced_chapter) + r": (\S+) - (.+)"
             referenced_section_identifiers = re.search(regex, f.read())
             if referenced_section_identifiers:
-                chapter_text = extract_chapter_text(revision_text, referenced_section_identifiers[1], referenced_paragraph)
+                return extract_chapter_text(revision_text, referenced_section_identifiers[1], referenced_paragraph)
             else:
                 return
                 # TODO error handling
@@ -109,7 +116,16 @@ def find_referenced_text(revision_text, referenced_revision_tag,
         # TODO error handling
 
 
-def process_referenced_paragraphs(references, revisions_text_dict):
+def target_revision_find_paragraph_id(target_revision_tag, target_revision_text, referenced_text):
+    regex = REVISION_PARAGRAPH_REGEX
+    result = re.findall(re.escape(referenced_text[1]), target_revision_text, re.M) # re.M makes ^$ match after and before line breaks in the subject string
+
+    if result is None or len(result) != 1:
+        handleTHIS = "TODO"
+    else:
+        x = 4
+
+def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag):
     for reference in references:
         referenced_revision_tag = reference["document"]["document"].lower()
         referenced_section = reference["document"]["section"].split(':')
@@ -120,8 +136,17 @@ def process_referenced_paragraphs(references, revisions_text_dict):
 
         referenced_text = find_referenced_text(revisions_text_dict[referenced_revision_tag], referenced_revision_tag,
                                                referenced_chapter, referenced_paragraph)
+        target_revision_find_paragraph_id(target_revision_tag, revisions_text_dict[target_revision_tag], referenced_text)
 
 
+"""
+(^—?\(?(\d+(?:\.\d+)*)\)?)[\s\S]+?(?=(^—?\(?(\d+(?:\.\d+)*)\)?))
+
+
+^.*\[except\.handle\][\s\S]*?\n—?\(?3\.1\)?([\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]
+
+—?\(?(\d+(?:\.\d+)*)\)?[\s\S]+?\n
+"""
 def main(argv):
     try:
         revision_set = set()
@@ -131,7 +156,7 @@ def main(argv):
         chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
         revisions_text_dict = read_referenced_revisions(revision_set)
 
-        process_referenced_paragraphs(references, revisions_text_dict)
+        process_referenced_paragraphs(references, revisions_text_dict, argv[1])
 
         # if chapter_mapping_to_target doesn't exist. create it
 
