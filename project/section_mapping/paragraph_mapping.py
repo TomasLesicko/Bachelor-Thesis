@@ -118,12 +118,15 @@ def find_referenced_text(revision_text, referenced_revision_tag,
 
 def target_revision_find_paragraph_id(target_revision_tag, target_revision_text, referenced_text):
     regex = REVISION_PARAGRAPH_REGEX
-    result = re.findall(re.escape(referenced_text[1]), target_revision_text, re.M) # re.M makes ^$ match after and before line breaks in the subject string
+    result = re.findall(regex, target_revision_text, re.M) # re.M makes ^$ match after and before line breaks in the subject string
 
-    if result is None or len(result) != 1:
+    if result is None:
         handleTHIS = "TODO"
     else:
-        x = 4
+        print("C")
+        for t in result:
+            if t[2] == referenced_text[1]: #difflib
+                x = 4
 
 def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag):
     for reference in references:
