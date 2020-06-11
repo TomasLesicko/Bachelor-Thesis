@@ -11,6 +11,7 @@ SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:.+)\n'
 
 def load_references():
     try:
+        print("Retrieving references.json from GitHub repository")
         with urlopen(
                 "https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
             references = json.loads(url.read())
@@ -29,6 +30,7 @@ def extract_revision_tag_list_from_references(references, revision_set):
     used tags and stores them to revision_set.
     revision_set -- set containing all revision tags from references
     """
+    print("Searching for revision tags in references")
     for reference in references:
         revision_set.add(reference['document']['document'].lower())
 
