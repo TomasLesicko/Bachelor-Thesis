@@ -8,8 +8,12 @@ import chapter_extractor
 import chapter_mapping
 
 SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
-REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?))"
+# REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
+REVISION_PARAGRAPH_REGEX = [r"(^—?\(?", r"\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"]
 # REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=\1)"
+
+# CHAPTER_PARSING_REGEX = r"(^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)[\s\S]+?(?=(^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
+CHAPTER_PARSING_REGEX = r" .+ \[.+\]$[\s\S]+?(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
 
 """
 - find all tags in refs + target ref tag, then open the contents in tika and save it in a dictionary
@@ -28,7 +32,6 @@ REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(
     large change - just show error, possibly not desirable to highlight a severely changed paragraph
 - use difflib library to compare the strings? SequenceMatcher.ratio() should compute similarity
     index between two strings, pretty much what i need, just worrying about scalability
--not sure what to do if the paragraph was moved to a different chapter
 """
 
 
@@ -84,51 +87,171 @@ def read_referenced_revisions(revision_set):
 
     return revisions_text_dict
 
+# # r"\[" + re.escape(identifier) + r"\][\s\S]+?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
+# def extract_chapter_text(revision_text, identifier, paragraph_id):
+#     # regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?\n—?\(?"\
+#     #         + re.escape(paragraph_id) + "\)?([\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]" # spaces instead of newlines near the end, the title is always in one line
+#     regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?(?:[\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
+#     # regex2 = r"(?:—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
+#     regex2 = r"(?:—?\(?((?:^|\(|\—)" + re.escape(paragraph_id) + r")\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
+#
+#     result = re.findall(regex, revision_text) # TODO check edge cases (EOF...)
+#     result2 = re.findall(regex2, result[0], re.M)
+#     if result is None or len(result) != 1:
+#         handleTHIS = "TODO"
+#
+#     return result2[0]
+
+
 # r"\[" + re.escape(identifier) + r"\][\s\S]+?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
-def extract_chapter_text(revision_text, identifier, paragraph_id):
+def extract_chapter_text(referenced_text, referenced_section):
+    referenced_chapter = referenced_section[0]
+    referenced_paragraph = referenced_section[1]
+
+    referenced_chapter_regex = r"^" + re.escape(referenced_chapter) + CHAPTER_PARSING_REGEX
+    referenced_chapter_text = re.findall(referenced_chapter_regex, referenced_text, re.M) #TODO exclude chapter title from the match, reason: chapter id can be same as paragraph id especally in the first few chapters, could cause problems when matching paragraph
+
+    referenced_paragraph_regex = REVISION_PARAGRAPH_REGEX[0] + re.escape(referenced_paragraph) + REVISION_PARAGRAPH_REGEX[1]
+    referenced_paragraph_text = re.findall(referenced_paragraph_regex, referenced_chapter_text[0], re.M)
+    # TODO paragraph regex matches everything until next identifier, may cause issues
+    debug = 0
+
+    return referenced_paragraph_text
+
+
+
+
+
     # regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?\n—?\(?"\
     #         + re.escape(paragraph_id) + "\)?([\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]" # spaces instead of newlines near the end, the title is always in one line
-    regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?(?:[\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
-    # regex2 = r"(?:—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
-    regex2 = r"(?:—?\(?((?:^|\(|\—)" + re.escape(paragraph_id) + r")\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
-
-    result = re.findall(regex, revision_text) # TODO check edge cases (EOF...)
-    result2 = re.findall(regex2, result[0], re.M)
-    if result is None or len(result) != 1:
-        handleTHIS = "TODO"
-
-    return result2[0]
 
 
-def find_referenced_text(revision_text, referenced_revision_tag,
-                         referenced_chapter, referenced_paragraph):
-    try:
-        with open("%s%s.txt" % (chapter_extractor.SECTION_FILE_SHARED_NAME, referenced_revision_tag), 'r') as f:
-            regex = re.escape(referenced_chapter) + r": (\S+) - (.+)"
-            referenced_section_identifiers = re.search(regex, f.read())
-            if referenced_section_identifiers:
-                return extract_chapter_text(revision_text, referenced_section_identifiers[1], referenced_paragraph)
-            else:
-                return
-                # TODO error handling
-    except:
-        return
-        # TODO error handling
+    # regex = r"\[" + re.escape(identifier) + r"\][\s\S]+?(?:[\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]"
+    # # regex2 = r"(?:—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
+    # regex2 = r"(?:—?\(?((?:^|\(|\—)" + re.escape(paragraph_id) + r")\)?)([\s\S]+?)(?=(?:—?\(?(?:\d+(?:\.\d+)*)\)?))"
+    #
+    # result = re.findall(regex, revision_text) # TODO check edge cases (EOF...)
+    # result2 = re.findall(regex2, result[0], re.M)
+    # if result is None or len(result) != 1:
+    #     handleTHIS = "TODO"
+    #
+    # return result2[0]
+
+# def find_referenced_text(revision_text, referenced_revision_tag,
+#                          referenced_chapter, referenced_paragraph):
+#     try:
+#         with open("%s%s.txt" % (chapter_extractor.SECTION_FILE_SHARED_NAME, referenced_revision_tag), 'r') as f:
+#             regex = re.escape(referenced_chapter) + r": (\S+) - (.+)"
+#             referenced_section_identifiers = re.search(regex, f.read())
+#             if referenced_section_identifiers:
+#                 return extract_chapter_text(revision_text, referenced_section_identifiers[1], referenced_paragraph)
+#             else:
+#                 return
+#                 # TODO error handling
+#     except:
+#         return
+#         # TODO error handling
 
 
-def target_revision_find_paragraph_id(target_revision_tag, target_revision_text, referenced_text):
+def find_referenced_text(revision_text, revision_tag, references, target_text):
+    for reference in references:
+        if reference["document"]["document"] == revision_tag:
+            referenced_section = re.split("[:/]", reference["document"]["section"]) # TODO other variations
+            if referenced_section is None or len(referenced_section) != 2:
+                print("Faulty reference")  # TODO error
+
+            referenced_text = extract_chapter_text(revision_text, referenced_section)
+            reference["document"]["section"] = target_revision_find_paragraph_id(target_text,
+                                                                                 referenced_text,
+                                                                                 referenced_section)
+
+
+# def find_referenced_text(revision_text, referenced_revision_tag,
+#                          referenced_chapter, referenced_paragraph):
+#     try:
+#         with open("%s%s.txt" % (chapter_extractor.SECTION_FILE_SHARED_NAME, referenced_revision_tag), 'r') as f:
+#             regex = re.escape(referenced_chapter) + r": (\S+) - (.+)"
+#             referenced_section_identifiers = re.search(regex, f.read())
+#             if referenced_section_identifiers:
+#                 return extract_chapter_text(revision_text, referenced_section_identifiers[1], referenced_paragraph)
+#             else:
+#                 return
+#                 # TODO error handling
+#     except:
+#         return
+#         # TODO error handling
+
+
+# def target_revision_find_paragraph_id(target_revision_tag, target_revision_text, referenced_text):
+#     regex = REVISION_PARAGRAPH_REGEX
+#     result = re.findall(regex, target_revision_text, re.M) # re.M makes ^$ match after and before line breaks in the subject string
+#
+#     if result is None:
+#         handleTHIS = "TODO"
+#     else:
+#         for t in result:
+#             if t[2] == referenced_text[1]: #difflib
+#                 return t[1] # TODO regex match whole chapter first to be able to find both chapter
+#                             # and paragraph id
+#             else:
+#                 handleTHIS = "TODO"
+#
+#     return "err"
+
+def target_revision_find_paragraph_id(target_revision_text, referenced_text, referenced_section):
+    # Find the same chapter (either via section mapping or regex)
+    # Attempt to match paragraph with difflib
+    # If no results, extend search to all chapters and repeat
+    # return chapter:paragraph
+
+    referenced_chapter = referenced_section[0]
+    referenced_paragraph = referenced_section[1]
+
+    referenced_chapter_regex = r"^" + re.escape(referenced_chapter) + CHAPTER_PARSING_REGEX
+    referenced_chapter_text = re.findall(referenced_chapter_regex, referenced_text, re.M) #TODO exclude chapter title from the match, reason: chapter id can be same as paragraph id especally in the first few chapters, could cause problems when matching paragraph
+
+    referenced_paragraph_regex = REVISION_PARAGRAPH_REGEX[0] + re.escape(referenced_paragraph) + REVISION_PARAGRAPH_REGEX[1]
+    referenced_paragraph_text = re.findall(referenced_paragraph_regex, referenced_chapter_text[0], re.M)
+    # TODO paragraph regex matches everything until next identifier, may cause issues
+    debug = 0
+
+    return referenced_paragraph_text
+
+
+
+
+
+
+
+
+
     regex = REVISION_PARAGRAPH_REGEX
     result = re.findall(regex, target_revision_text, re.M) # re.M makes ^$ match after and before line breaks in the subject string
 
     if result is None:
         handleTHIS = "TODO"
     else:
-        print("C")
         for t in result:
             if t[2] == referenced_text[1]: #difflib
-                x = 4
+                return t[1] # TODO regex match whole chapter first to be able to find both chapter
+                            # and paragraph id
+            else:
+                handleTHIS = "TODO"
+
+    return "err"
 
 def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag):
+    debug = 0
+
+    # iterate over text_dict instead of references - would be more efficient
+    target_text = revisions_text_dict[target_revision_tag]
+    for tag, revision_text in revisions_text_dict.items():
+        if tag != target_revision_tag:
+            referenced_text = find_referenced_text(revision_text, tag, references, target_text)
+
+
+
+
     for reference in references:
         referenced_revision_tag = reference["document"]["document"].lower()
         referenced_section = reference["document"]["section"].split(':')
@@ -139,7 +262,7 @@ def process_referenced_paragraphs(references, revisions_text_dict, target_revisi
 
         referenced_text = find_referenced_text(revisions_text_dict[referenced_revision_tag], referenced_revision_tag,
                                                referenced_chapter, referenced_paragraph)
-        target_revision_find_paragraph_id(target_revision_tag, revisions_text_dict[target_revision_tag], referenced_text)
+        reference["document"]["section"] = target_revision_find_paragraph_id(target_revision_tag, revisions_text_dict[target_revision_tag], referenced_text)
 
 
 """
