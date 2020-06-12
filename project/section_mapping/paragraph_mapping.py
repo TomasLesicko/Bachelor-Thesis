@@ -3,6 +3,7 @@ import sys
 import re
 from tika import parser
 import json
+import difflib
 
 import chapter_extractor
 import chapter_mapping
@@ -214,6 +215,16 @@ def find_referenced_text(revision_text, revision_tag, references, target_text):
 #
 #     return "err"
 
+def func(r1a):
+    max_i = 0
+    max_r = 0
+    for i in range(len(r1a)):
+        if r1a[i][1] > max_r:
+            max_i = i
+
+    return r1a[max_i]
+
+
 def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph_text, referenced_section, referenced_chapter_id):
     # Find the same chapter (either via section mapping or regex)
     # Attempt to match paragraph with difflib
@@ -221,7 +232,6 @@ def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph
     # return chapter:paragraph
 
     regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_BRACKET_ID, re.escape(referenced_chapter_id), 1)
-    # TODO use the constant via re.replace
     id = ""
 
     presumed_target_text_chapter = re.findall(regex, target_revision_text, re.M)
@@ -230,6 +240,28 @@ def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph
     else:
         t = 0
         # traverse whole document
+
+    target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, presumed_target_text_chapter[0][1], re.M)
+    #TODO match paragraphs correctly if they're split by new page
+
+    r1a = []
+    r2a = []
+    for paragraph in target_chapter_paragraphs:
+        matcher = difflib.SequenceMatcher(None, referenced_paragraph_text[0][1], paragraph[2])
+        ratio1 = matcher.ratio()
+        ratio2 = matcher.quick_ratio()
+        #ratio3 = matcher.real_quick_ratio()
+
+        if ratio1 > 0.3: r1a.append((paragraph, ratio1))
+        if ratio2 > 0.9: r2a.append((paragraph, ratio2))
+        #opcodes = matcher.get_opcodes()
+        #matcher = difflib.get_close_matches(referenced_paragraph_text[0][1], paragraph, 1, 0.9)
+
+    m = func(r1a)
+    id += ":"
+    id += m[0][0]
+    return id
+    debug = 0
 
     target_text_paragraph = re.findall(re.escape(referenced_paragraph_text[0][1]), presumed_target_text_chapter[0][1], re.M)
 
