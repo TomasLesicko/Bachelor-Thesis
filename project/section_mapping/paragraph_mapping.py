@@ -9,11 +9,22 @@ import chapter_mapping
 
 SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 # REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
-REVISION_PARAGRAPH_REGEX = [r"(^—?\(?", r"\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"]
+
+
+#REVISION_PARAGRAPH_REGEX = [r"(^—?\(?", r"\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"]
+PARAGRAPH_PARSING_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
+PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
+
+
 # REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=\1)"
 
 # CHAPTER_PARSING_REGEX = r"(^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)[\s\S]+?(?=(^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
-CHAPTER_PARSING_REGEX = r" .+ \[(.+)\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
+
+
+#CHAPTER_PARSING_REGEX = r" .+ \[(.+)\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
+CHAPTER_PARSING_REGEX = r"(^[A-Z0-9](?:\d)*(?:\.\d+)*) .+ \[(.+)\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
+CHAPTER_PARSING_REGEX_NUM_ID = r"^[A-Z0-9](?:\d)*(?:\.\d+)*"
+CHAPTER_PARSING_REGEX_BRACKET_ID = r"(.+)"
 
 """
 - find all tags in refs + target ref tag, then open the contents in tika and save it in a dictionary
@@ -110,16 +121,17 @@ def extract_chapter_text(referenced_text, referenced_section):
     referenced_chapter = referenced_section[0]
     referenced_paragraph = referenced_section[1]
 
-    referenced_chapter_regex = r"^" + re.escape(referenced_chapter) + CHAPTER_PARSING_REGEX
+    referenced_chapter_regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_NUM_ID, re.escape(referenced_chapter), 1)
     referenced_chapter_text = re.findall(referenced_chapter_regex, referenced_text, re.M) #TODO exclude chapter title from the match, reason: chapter id can be same as paragraph id especally in the first few chapters, could cause problems when matching paragraph
-    referenced_chapter_id = referenced_chapter_text[0][0]
+    referenced_chapter_bracket_id = referenced_chapter_text[0][1]
 
-    referenced_paragraph_regex = REVISION_PARAGRAPH_REGEX[0] + re.escape(referenced_paragraph) + REVISION_PARAGRAPH_REGEX[1]
-    referenced_paragraph_text = re.findall(referenced_paragraph_regex, referenced_chapter_text[0][1], re.M)
+    # referenced_paragraph_regex = REVISION_PARAGRAPH_REGEX[0] + re.escape(referenced_paragraph) + REVISION_PARAGRAPH_REGEX[1]
+    referenced_paragraph_regex = PARAGRAPH_PARSING_REGEX.replace(PARAGRAPH_PARSING_REGEX_NUM_ID, re.escape(referenced_paragraph), 1)
+    referenced_paragraph_text = re.findall(referenced_paragraph_regex, referenced_chapter_text[0][2], re.M)
     # TODO paragraph regex matches everything until next identifier, may cause issues
     debug = 0
 
-    return referenced_paragraph_text, referenced_chapter_id
+    return referenced_paragraph_text, referenced_chapter_bracket_id
 
 
 
@@ -208,7 +220,7 @@ def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph
     # If no results, extend search to all chapters and repeat
     # return chapter:paragraph
 
-    regex = r"(^[A-Z0-9](?:\d)*(?:\.\d+)*) .+ \[" + re.escape(referenced_chapter_id) + r"\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
+    regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_BRACKET_ID, re.escape(referenced_chapter_id), 1)
     # TODO use the constant via re.replace
     id = ""
 
@@ -264,7 +276,7 @@ def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph
 def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag):
     debug = 0
 
-    print("Mappng references to %" % target_revision_tag)
+    print("Mappng references to %s" % target_revision_tag)
     target_text = revisions_text_dict[target_revision_tag]
     for tag, revision_text in revisions_text_dict.items():
         if tag != target_revision_tag:
@@ -286,14 +298,6 @@ def process_referenced_paragraphs(references, revisions_text_dict, target_revisi
         reference["document"]["section"] = target_revision_find_paragraph_id(target_revision_tag, revisions_text_dict[target_revision_tag], referenced_text)
 
 
-"""
-(^—?\(?(\d+(?:\.\d+)*)\)?)[\s\S]+?(?=(^—?\(?(\d+(?:\.\d+)*)\)?))
-
-
-^.*\[except\.handle\][\s\S]*?\n—?\(?3\.1\)?([\s\S]+?)\n\n[\s\S]*?[A-Z0-9]+(?:\.\d+)* .+? \[.+?\]
-
-—?\(?(\d+(?:\.\d+)*)\)?[\s\S]+?\n
-"""
 def main(argv):
     try:
         # TODO add option to use local references by provding path
