@@ -12,17 +12,16 @@ SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 # REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
 
 
-#REVISION_PARAGRAPH_REGEX = [r"(^—?\(?", r"\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"]
+# REVISION_PARAGRAPH_REGEX = [r"(^—?\(?", r"\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"]
 PARAGRAPH_PARSING_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
 PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
-
 
 # REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=\1)"
 
 # CHAPTER_PARSING_REGEX = r"(^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)[\s\S]+?(?=(^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
 
 
-#CHAPTER_PARSING_REGEX = r" .+ \[(.+)\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
+# CHAPTER_PARSING_REGEX = r" .+ \[(.+)\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
 CHAPTER_PARSING_REGEX = r"(^[A-Z0-9](?:\d)*(?:\.\d+)*) .+ \[(.+)\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
 CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
 CHAPTER_PARSING_REGEX_BRACKET_ID = r"(.+)"
@@ -56,7 +55,7 @@ def read_referenced_revisions(revision_set):
                             revision_tag.lower() + ".pdf")
         print("\t%s" % revision_tag)
         try:
-            contents = parser.from_file(path)["content"]
+            contents = parser.from_file(path)["content"]  # TODO retrieval bugfix
             revisions_text_dict[revision_tag] = contents
         except FileNotFoundError as fnfe:
             print(fnfe)
@@ -64,32 +63,39 @@ def read_referenced_revisions(revision_set):
 
     return revisions_text_dict
 
+
 def extract_paragraph_text(revision_text, referenced_section):
     referenced_chapter = referenced_section[0]
     referenced_paragraph = referenced_section[1]
 
-    referenced_chapter_regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_NUM_ID, re.escape(referenced_chapter), 1)
-    referenced_chapter_text = re.findall(referenced_chapter_regex, revision_text, re.M) #TODO exclude chapter title from the match, reason: chapter id can be same as paragraph id especally in the first few chapters, could cause problems when matching paragraph
+    referenced_chapter_regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_NUM_ID,
+                                                             re.escape(referenced_chapter), 1)
+    referenced_chapter_text = re.findall(referenced_chapter_regex, revision_text,
+                                         re.M)  # TODO exclude chapter title from the match, reason: chapter id can be same as paragraph id especally in the first few chapters, could cause problems when matching paragraph
     referenced_chapter_bracket_id = referenced_chapter_text[0][1]
 
-    referenced_paragraph_regex = PARAGRAPH_PARSING_REGEX.replace(PARAGRAPH_PARSING_REGEX_NUM_ID, re.escape(referenced_paragraph), 1)
+    referenced_paragraph_regex = PARAGRAPH_PARSING_REGEX.replace(PARAGRAPH_PARSING_REGEX_NUM_ID,
+                                                                 re.escape(referenced_paragraph), 1)
     referenced_paragraph_text = re.findall(referenced_paragraph_regex, referenced_chapter_text[0][2], re.M)
     # TODO paragraph regex matches everything until next identifier, may cause issues
 
     return referenced_paragraph_text, referenced_chapter_bracket_id
 
+
 def find_referenced_text(revision_text, revision_tag, references, target_text):
     for reference in references:
         if reference["document"]["document"] == revision_tag:
-            referenced_section = re.split("[:/]", reference["document"]["section"]) # TODO other variations
+            referenced_section = re.split("[:/]", reference["document"]["section"])  # TODO other variations
             if referenced_section is None or len(referenced_section) != 2:
-                print("Faulty reference")  # TODO error
+                print("Faulty reference: %s" % reference["document"]["document"])  # TODO error
 
-            referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(revision_text, referenced_section)
+            referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(revision_text,
+                                                                                              referenced_section)
             reference["document"]["section"] = target_revision_find_paragraph_id(target_text,
                                                                                  referenced_paragraph_text,
                                                                                  referenced_section,
                                                                                  referenced_chapter_bracket_id)
+
 
 def func(r1a):
     max_i = 0
@@ -101,9 +107,10 @@ def func(r1a):
     return r1a[max_i]
 
 
-def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph_text, referenced_section, referenced_chapter_id):
-
-    regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_BRACKET_ID, re.escape(referenced_chapter_id), 1)
+def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph_text, referenced_section,
+                                      referenced_chapter_id):
+    regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_BRACKET_ID,
+                                          re.escape(referenced_chapter_id), 1)
     id = ""
 
     presumed_target_text_chapter = re.findall(regex, target_revision_text, re.M)
@@ -114,49 +121,56 @@ def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph
         # TODO traverse whole document
 
     target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, presumed_target_text_chapter[0][1], re.M)
-    #TODO match paragraphs correctly if they're split by new page
+    # TODO match paragraphs correctly if they're split by new page
 
     r1a = []
     r2a = []
     i = 0
     for paragraph in target_chapter_paragraphs:
-        print(i)
-        if i == 0:
-            x = 3
-        i += 1
+
         matcher = difflib.SequenceMatcher(None, referenced_paragraph_text[0][1], paragraph[2])
         ratio1 = matcher.ratio()
         ratio2 = matcher.quick_ratio()
-        #ratio3 = matcher.real_quick_ratio()
+        # ratio3 = matcher.real_quick_ratio()
 
         if ratio1 > 0.3: r1a.append((paragraph, ratio1))
         if ratio2 > 0.9: r2a.append((paragraph, ratio2))
-        #opcodes = matcher.get_opcodes()
-        #matcher = difflib.get_close_matches(referenced_paragraph_text[0][1], paragraph, 1, 0.9)
-        #TODO try to obtain the diff text in readable format and display the diff in annotation
+        # opcodes = matcher.get_opcodes()
+        # matcher = difflib.get_close_matches(referenced_paragraph_text[0][1], paragraph, 1, 0.9)
+        # TODO try to obtain the diff text in readable format and display the diff in annotation
 
     m = func(r1a)
     id += ":"
     id += m[0][0]
     return id
 
+
 def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag):
     print("Mapping references to %s" % target_revision_tag)
     target_text = revisions_text_dict[target_revision_tag]
     for tag, revision_text in revisions_text_dict.items():
         if tag != target_revision_tag:
-            referenced_text = find_referenced_text(revision_text, tag, references, target_text)
+            find_referenced_text(revision_text, tag, references, target_text)
+
+
+def map_paragraphs_to_target_revision(target_revision_tag):
+    # TODO add option to use local references by provding path
+    revision_set = set()
+    revision_set.add(target_revision_tag)  # add target revision tag to the set
+    references = chapter_mapping.load_references()
+    chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
+
+    revisions_text_dict = read_referenced_revisions(revision_set)
+    process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag)
+
+    return references
+
 
 def main(argv):
-    #try:
-        # TODO add option to use local references by provding path
-        revision_set = set()
-        revision_set.add(argv[1])  # add target revision tag to the set
-        references = chapter_mapping.load_references()
-        chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
+    references = map_paragraphs_to_target_revision(sys.argv[1])
+    x = 0
 
-        revisions_text_dict = read_referenced_revisions(revision_set)
-        process_referenced_paragraphs(references, revisions_text_dict, argv[1])
+    # try:
 
     # except (RuntimeError, IndexError, FileNotFoundError) as e:
     #     print(e)
