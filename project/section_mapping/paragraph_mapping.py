@@ -82,19 +82,39 @@ def extract_paragraph_text(revision_text, referenced_section):
     return referenced_paragraph_text, referenced_chapter_bracket_id
 
 
-def find_referenced_text(revision_text, revision_tag, references, target_text):
+def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag):
+    print("Mapping references to %s" % target_revision_tag)
+    target_text = revisions_text_dict[target_revision_tag]
+
     for reference in references:
-        if reference["document"]["document"] == revision_tag:
+        referenced_revision_tag = reference["document"]["document"].lower()
+        if referenced_revision_tag != target_revision_tag:
             referenced_section = re.split("[:/]", reference["document"]["section"])  # TODO other variations
             if referenced_section is None or len(referenced_section) != 2:
-                print("Faulty reference: %s" % reference["document"]["document"])  # TODO error
+                print("Faulty reference: %s" % referenced_revision_tag)  # TODO error
 
-            referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(revision_text,
-                                                                                              referenced_section)
+            referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(
+                revisions_text_dict[referenced_revision_tag],
+                referenced_section)
             reference["document"]["section"] = target_revision_find_paragraph_id(target_text,
                                                                                  referenced_paragraph_text,
                                                                                  referenced_section,
                                                                                  referenced_chapter_bracket_id)
+
+
+# def find_referenced_text(revision_text, revision_tag, references, target_text):
+#     for reference in references:
+#         if reference["document"]["document"] == revision_tag:
+#             referenced_section = re.split("[:/]", reference["document"]["section"])  # TODO other variations
+#             if referenced_section is None or len(referenced_section) != 2:
+#                 print("Faulty reference: %s" % reference["document"]["document"])  # TODO error
+#
+#             referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(revision_text,
+#                                                                                               referenced_section)
+#             reference["document"]["section"] = target_revision_find_paragraph_id(target_text,
+#                                                                                  referenced_paragraph_text,
+#                                                                                  referenced_section,
+#                                                                                  referenced_chapter_bracket_id)
 
 
 def func(r1a):
@@ -139,24 +159,19 @@ def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph
         # matcher = difflib.get_close_matches(referenced_paragraph_text[0][1], paragraph, 1, 0.9)
         # TODO try to obtain the diff text in readable format and display the diff in annotation
 
+    if not r1a:
+        x = 4 #ref may not exist in target_revision
     m = func(r1a)
     id += ":"
     id += m[0][0]
     return id
 
 
-def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag):
-    print("Mapping references to %s" % target_revision_tag)
-    target_text = revisions_text_dict[target_revision_tag]
-    for tag, revision_text in revisions_text_dict.items():
-        if tag != target_revision_tag:
-            find_referenced_text(revision_text, tag, references, target_text)
-
-
 def map_paragraphs_to_target_revision(target_revision_tag):
     # TODO add option to use local references by providing path
     revision_set = set()
     revision_set.add(target_revision_tag)
+
     references = chapter_mapping.load_references()
     chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
 
@@ -167,7 +182,7 @@ def map_paragraphs_to_target_revision(target_revision_tag):
 
 
 def main(argv):
-    references = map_paragraphs_to_target_revision(sys.argv[1]) #TODO argparse lib
+    references = map_paragraphs_to_target_revision(sys.argv[1])  # TODO argparse lib
     x = 0
 
     # try:
