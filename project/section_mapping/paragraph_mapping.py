@@ -53,13 +53,13 @@ def read_referenced_revisions(revision_set):
     for revision_tag in revision_set:
         path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/',
                             revision_tag.lower() + ".pdf")
-        print("\t%s" % revision_tag)
+        print("\tLoading %s" % revision_tag)
         try:
-            contents = parser.from_file(path)["content"]  # TODO retrieval bugfix
+            contents = parser.from_file(path)["content"]  # TODO retrieval bugfix on fresh start
             revisions_text_dict[revision_tag] = contents
         except FileNotFoundError as fnfe:
             print(fnfe)
-            print("\t[WARNING] Could not find revision %s in draft/papers" % revision_tag)
+            print("[WARNING] Could not find revision %s in draft/papers" % revision_tag)
 
     return revisions_text_dict
 
@@ -154,9 +154,9 @@ def process_referenced_paragraphs(references, revisions_text_dict, target_revisi
 
 
 def map_paragraphs_to_target_revision(target_revision_tag):
-    # TODO add option to use local references by provding path
+    # TODO add option to use local references by providing path
     revision_set = set()
-    revision_set.add(target_revision_tag)  # add target revision tag to the set
+    revision_set.add(target_revision_tag)
     references = chapter_mapping.load_references()
     chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
 
@@ -167,7 +167,7 @@ def map_paragraphs_to_target_revision(target_revision_tag):
 
 
 def main(argv):
-    references = map_paragraphs_to_target_revision(sys.argv[1])
+    references = map_paragraphs_to_target_revision(sys.argv[1]) #TODO argparse lib
     x = 0
 
     # try:
