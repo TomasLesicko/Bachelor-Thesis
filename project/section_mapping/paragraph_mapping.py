@@ -8,6 +8,10 @@ import difflib
 import chapter_extractor
 import chapter_mapping
 
+DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.4
+DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD = 0.3
+DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE = 0.05
+
 SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 # REVISION_PARAGRAPH_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
 
@@ -72,6 +76,7 @@ def extract_paragraph_text(revision_text, referenced_section):
                                                              re.escape(referenced_chapter), 1)
     referenced_chapter_text = re.findall(referenced_chapter_regex, revision_text,
                                          re.M)  # TODO exclude chapter title from the match, reason: chapter id can be same as paragraph id especally in the first few chapters, could cause problems when matching paragraph
+    # TODO if no match, referenced chapter or paragraph must be wrong for the given revision
     referenced_chapter_bracket_id = referenced_chapter_text[0][1]
 
     referenced_paragraph_regex = PARAGRAPH_PARSING_REGEX.replace(PARAGRAPH_PARSING_REGEX_NUM_ID,
@@ -96,75 +101,80 @@ def process_referenced_paragraphs(references, revisions_text_dict, target_revisi
             referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(
                 revisions_text_dict[referenced_revision_tag],
                 referenced_section)
-            reference["document"]["section"] = target_revision_find_paragraph_id(target_text,
-                                                                                 referenced_paragraph_text,
-                                                                                 referenced_section,
-                                                                                 referenced_chapter_bracket_id)
-
-
-# def find_referenced_text(revision_text, revision_tag, references, target_text):
-#     for reference in references:
-#         if reference["document"]["document"] == revision_tag:
-#             referenced_section = re.split("[:/]", reference["document"]["section"])  # TODO other variations
-#             if referenced_section is None or len(referenced_section) != 2:
-#                 print("Faulty reference: %s" % reference["document"]["document"])  # TODO error
-#
-#             referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(revision_text,
-#                                                                                               referenced_section)
-#             reference["document"]["section"] = target_revision_find_paragraph_id(target_text,
-#                                                                                  referenced_paragraph_text,
-#                                                                                  referenced_section,
-#                                                                                  referenced_chapter_bracket_id)
+            target_revision_section_id = target_revision_find_section_id(target_text,
+                                                                         referenced_paragraph_text,
+                                                                         referenced_chapter_bracket_id, referenced_revision_tag, referenced_section)
+            if target_revision_section_id:
+                reference["document"]["section"] = target_revision_section_id
+            else:
+                # TODO mark reference as faulty
+                x = 0
 
 
 def func(r1a):
     max_i = 0
     max_r = 0
     for i in range(len(r1a)):
-        if r1a[i][1] > max_r:
+        if r1a[i][2] > max_r:
             max_i = i
+            max_r = r1a[i][2]
 
     return r1a[max_i]
 
 
-def target_revision_find_paragraph_id(target_revision_text, referenced_paragraph_text, referenced_section,
-                                      referenced_chapter_id):
+def target_revision_find_paragraph_id(chapter_text, paragraph_text, threshold, referenced_revision_tag, referenced_section):
+    r1a = []
+    for c in chapter_text:
+        target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, c[2], re.M)
+        # TODO match paragraphs correctly if they're split by new page
+
+        for paragraph in target_chapter_paragraphs:
+
+            matcher = difflib.SequenceMatcher(None, paragraph_text, paragraph[2])
+            ratio1 = matcher.ratio()
+            # ratio2 = matcher.quick_ratio()
+            # ratio3 = matcher.real_quick_ratio()
+
+            if ratio1 > threshold: r1a.append((c[0], paragraph, ratio1))
+            # if ratio2 > 0.9: r1a.append((c[0], paragraph, ratio2))
+        # TODO try to obtain the diff text in readable format and display the diff in annotation
+
+    if r1a:
+        m = func(r1a)
+        return m[0] + ":" + m[1][1]
+
+    if threshold > DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD:
+        print("Couldn't match referenced paragraph, retrying with lower match ratio (%s - %s)\nReference:\n%s %s:%s"
+              % (threshold, DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, referenced_revision_tag, referenced_section[0],
+                 referenced_section[1]))
+        return target_revision_find_paragraph_id(chapter_text, paragraph_text,
+                                                 round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2),
+                                                 referenced_revision_tag, referenced_section)
+    print("Failed to match referenced paragraph with minimum allowed match ratio (%s)\nReference:\n%s %s:%s" %
+          (DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD, referenced_revision_tag, referenced_section[0],
+           referenced_section[1])) # TODO write failed references to file
+    return ""
+
+
+def target_revision_find_section_id(target_revision_text, referenced_paragraph_text, referenced_chapter_id, referenced_revision_tag, referenced_section):
     regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_BRACKET_ID,
-                                          re.escape(referenced_chapter_id), 1)
-    id = ""
+                                          r"(" + re.escape(referenced_chapter_id) + r")", 1)
 
     presumed_target_text_chapter = re.findall(regex, target_revision_text, re.M)
     if presumed_target_text_chapter:
-        id += presumed_target_text_chapter[0][0]
+        section_id = target_revision_find_paragraph_id(presumed_target_text_chapter, referenced_paragraph_text[0][1],
+                                                       DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD, referenced_revision_tag, referenced_section)
+        if section_id:
+            return section_id
     else:
-        t = 0
-        # TODO traverse whole document
+        target_revision_chapters = re.findall(CHAPTER_PARSING_REGEX, target_revision_text, re.M)
+        section_id = target_revision_find_paragraph_id(target_revision_chapters,
+                                                       referenced_paragraph_text,
+                                                       DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD, referenced_revision_tag[0][1], referenced_section)
+        if section_id:
+            return section_id
 
-    target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, presumed_target_text_chapter[0][1], re.M)
-    # TODO match paragraphs correctly if they're split by new page
-
-    r1a = []
-    r2a = []
-    i = 0
-    for paragraph in target_chapter_paragraphs:
-
-        matcher = difflib.SequenceMatcher(None, referenced_paragraph_text[0][1], paragraph[2])
-        ratio1 = matcher.ratio()
-        ratio2 = matcher.quick_ratio()
-        # ratio3 = matcher.real_quick_ratio()
-
-        if ratio1 > 0.3: r1a.append((paragraph, ratio1))
-        if ratio2 > 0.9: r2a.append((paragraph, ratio2))
-        # opcodes = matcher.get_opcodes()
-        # matcher = difflib.get_close_matches(referenced_paragraph_text[0][1], paragraph, 1, 0.9)
-        # TODO try to obtain the diff text in readable format and display the diff in annotation
-
-    if not r1a:
-        x = 4 #ref may not exist in target_revision
-    m = func(r1a)
-    id += ":"
-    id += m[0][0]
-    return id
+    return ""
 
 
 def map_paragraphs_to_target_revision(target_revision_tag):
@@ -182,7 +192,7 @@ def map_paragraphs_to_target_revision(target_revision_tag):
 
 
 def main(argv):
-    references = map_paragraphs_to_target_revision(sys.argv[1])  # TODO argparse lib
+    references = map_paragraphs_to_target_revision(sys.argv[1])  # TODO argparse lib, progressbar?
     x = 0
 
     # try:
