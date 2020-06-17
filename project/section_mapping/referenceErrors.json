@@ -1,0 +1,13 @@
+[
+    {
+        "document": {
+            "document": "N4778",
+            "section": "6.2/8"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/class.k",
+            "line": "86"
+        },
+        "error": "Failed to locate referenced section in target revision (n4296)"
+    }
+]
