@@ -1,6 +1,61 @@
 [
     {
         "document": {
+            "document": "n4296",
+            "section": "5.10:3.1-3.2"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/common/expr/relational.k",
+            "line": "27"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "5.10:3.1-3.2"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/common/expr/relational.k",
+            "line": "56"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "13.3.1:5.1-5.2"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/overloading.k",
+            "line": "220"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "13.3.3.2:3.1.3"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/overloading.k",
+            "line": "776"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "13.3.3.2:3.1.4"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/overloading.k",
+            "line": "790"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
             "document": "N4778",
             "section": "6.2/8"
         },
@@ -8,6 +63,83 @@
             "file": "semantics/cpp/language/translation/decl/class.k",
             "line": "86"
         },
-        "error": "Failed to locate referenced section in target revision (n4296)"
+        "error": "Failed to locate referenced section in target revision (n4140)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.6-4.7"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/class.k",
+            "line": "351"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.6.2:8.1"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/class.k",
+            "line": "449"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.6.2:8.2"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/class.k",
+            "line": "463"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.6.2:8.3"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/class.k",
+            "line": "475"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.9,4.11"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/class.k",
+            "line": "511"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "8.5:7.2-7.3"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/initializer.k",
+            "line": "148"
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.2/3:"
+        },
+        "semantics": {
+            "file": "semantics/cpp/language/translation/decl/enum.k",
+            "line": "314"
+        },
+        "error": "Unsupported section format"
     }
 ]

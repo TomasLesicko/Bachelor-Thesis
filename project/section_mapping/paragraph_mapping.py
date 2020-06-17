@@ -35,7 +35,7 @@ def read_referenced_revisions(revision_set):
         except FileNotFoundError as fnfe:
             print(fnfe)
             print("Could not find revision %s in draft/papers" % revision_tag)
-            raise
+            raise fnfe
 
     return revisions_text_dict
 
@@ -110,8 +110,8 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
 
     # if no similar paragraph was found, retry with lower ratio threshold
     if threshold > DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD:
-        print("\tCouldn't match referenced paragraph, retrying with lower match ratio (%s - %s)\n\tReference:\n\t%s %s:%s"
-              % (threshold, DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, referenced_revision_tag, referenced_section[0],
+        print("\tCouldn't match referenced paragraph, retrying with lower match ratio (%s)\n\tReference:\n\t%s %s:%s"
+              % (round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2), referenced_revision_tag, referenced_section[0],
                  referenced_section[1]))
         return target_revision_find_paragraph_id(target_revision_chapters, paragraph_text,
                                                  round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2),
@@ -194,8 +194,11 @@ def map_paragraphs_to_target_revision(target_revision_tag):
 
 
 def main(argv):
-    references = map_paragraphs_to_target_revision(sys.argv[1])  # TODO argparse lib, progressbar?
-    x = 0
+    try:
+        references = map_paragraphs_to_target_revision(sys.argv[1])  # TODO argparse lib, progressbar?
+        x = 0
+    except (IndexError, FileNotFoundError) as e:
+        print("Usage: \"paragraphMapping.py <tag>\"\ne.g. \"paragraphMapping.py n4296\"")
 
     # try:
 
