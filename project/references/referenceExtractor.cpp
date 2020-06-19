@@ -37,8 +37,8 @@ std::ostream & operator<<(std::ostream &o, Lines const &lines) {
 struct FileContext {
 	std::string fileName;
 	//int lineNumber;
-	//std::vector<Lines> lineNumbers;
-	Lines lineNumbers;
+	std::vector<Lines> lineNumbers;
+	//Lines lineNumbers;
 };
 
 std::ostream & operator<<(std::ostream &o, FileContext const &fc) {
@@ -150,34 +150,65 @@ void print(std::optional<DocumentRef> ref) {
 //	}
 //};
 
+// TODO end commentBlock after a certain amount of rules or a keyword such as endmodule
 void addEntriesFromIstream(Entries & entries, std::string path, std::istream & is) {
-	FileContext fc {path, {1, 1}};
-	int lineNumber = 1;
-	std::string line;
-	bool commentBlock = false;
+    //FileContext fc {path, {Lines{1,1}}};
+    int lineNumber = 1;
+    std::vector<Entry> commentBlockRefs;
 
-	while(std::getline(is, line)) {
-		std::optional<DocumentRef> ref = refFromLine(line);
-		if (ref) {
-		    fc.lineNumbers.from = lineNumber;
-		    fc.lineNumbers.to = lineNumber;
-            entries.push_back(Entry{fc, std::move(ref.value())});
-            commentBlock = true;
-		}
-		else if(lineContainsComment(line) && commentBlock) {
-		    if(!entries.empty()) {
-                entries.back().fileContext.lineNumbers.to++;
-		    }
-		    else {
-		        std::cerr << "Error, in a commentBlock with empty entries\n";
-		    }
-		}
-		else {
-		    commentBlock = false;
-		}
+    std::string line;
+    bool commentBlockStart = true;
+    // references are located at the top of the comment block
 
-		lineNumber++;
-	}
+    while(std::getline(is, line)) {
+        if(lineContainsComment(line)) {
+            std::optional<DocumentRef> ref = refFromLine(line);
+            if (ref) {
+                if (commentBlockStart) {
+                    auto it = std::next(commentBlockRefs.begin(), commentBlockRefs.size());
+                    std::move(commentBlockRefs.begin(), it, std::back_inserter(entries));
+                    commentBlockRefs.erase(commentBlockRefs.begin(), it);
+
+                    commentBlockStart = false;
+                }
+
+                commentBlockRefs.push_back(Entry{FileContext{path, {Lines{lineNumber, lineNumber}}}, std::move(ref.value())});
+            }
+            else {
+                if (!commentBlockRefs.empty()) {
+                    // if the previous line was not a ref comment, add a new range of Lines to entry
+                    if (commentBlockRefs.back().fileContext.lineNumbers.back().to + 1 != lineNumber) {
+                        std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
+                            e.fileContext.lineNumbers.emplace_back(Lines{lineNumber, lineNumber});
+                        });
+                    }
+                    else {
+                        std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
+                            e.fileContext.lineNumbers.back().to = lineNumber;
+                        });
+                    }
+                    commentBlockStart = true;
+                }
+            }
+        }
+        else {
+            // if current line is not a comment and last commented line was reference
+            // the block ends, references are at the top of comment blocks
+            // a comment "block" ending with a reference is a single line reference
+            if (!commentBlockStart) {
+                auto it = std::next(commentBlockRefs.begin(), commentBlockRefs.size());
+                std::move(commentBlockRefs.begin(), it, std::back_inserter(entries));
+                commentBlockRefs.erase(commentBlockRefs.begin(), it);
+            }
+            commentBlockStart = true;
+        }
+
+        ++lineNumber;
+    }
+    auto it = std::next(commentBlockRefs.begin(), commentBlockRefs.size());
+    std::move(commentBlockRefs.begin(), it, std::back_inserter(entries));
+    commentBlockRefs.erase(commentBlockRefs.begin(), it);
+
 };
 
 // expects "// @ref[...]" format
@@ -234,12 +265,14 @@ Entries entriesFromPath(fs::path path) {
 }
 
 int main(int argc, char *argv[]) {
+    std::string x = "hello";
 	if (argc != 2) {
 		std::cerr << "Usage: " << argv[0] << " <path>\n";
 		return 1;
 	}
 	try {
-		std::cout << entriesFromPath(argv[1]);
+	    std::ofstream  references ("references.json");
+		references << entriesFromPath(argv[1]);
 	} catch (std::exception const &e) {
 		std::cerr << "Error: " << e.what() << '\n';
 	}
