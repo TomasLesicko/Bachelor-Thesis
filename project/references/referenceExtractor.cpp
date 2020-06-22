@@ -9,10 +9,12 @@
 
 namespace fs = std::experimental::filesystem;
 
+
 struct Lines {
     int from;
     int to;
 };
+
 
 std::ostream & operator<<(std::ostream &o, std::vector<Lines> const &lines) {
     bool first = true;
@@ -27,6 +29,7 @@ std::ostream & operator<<(std::ostream &o, std::vector<Lines> const &lines) {
     return o;
 }
 
+
 std::ostream & operator<<(std::ostream &o, Lines const &lines) {
         o << R"({ "from": ")" << lines.from;
         o << R"(", "to": ")" << lines.to << R"(" })";
@@ -34,40 +37,46 @@ std::ostream & operator<<(std::ostream &o, Lines const &lines) {
         return o;
 }
 
+
 struct FileContext {
 	std::string fileName;
-	//int lineNumber;
 	std::vector<Lines> lineNumbers;
-	//Lines lineNumbers;
 };
 
+
 std::ostream & operator<<(std::ostream &o, FileContext const &fc) {
-	o << "{ \"file\": \"" << fc.fileName;
-	o << "\", \"lines\": \"" << /*fc.lineNumber*/fc.lineNumbers << "\" }";
+	o << R"({ "file": ")" << fc.fileName;
+	o << R"(", "lines": ")" << /*fc.lineNumber*/fc.lineNumbers << "\" }";
 	return o;
 }
 
 struct DocumentRef {
 	std::string document;
 	std::string section;
+	bool isTodo;
 };
 
+
 std::ostream & operator<<(std::ostream &o, DocumentRef const &ref) {
-	o << "{ \"document\": \"" << ref.document << '"';
-	o << ", \"section\": \"" << ref.section << "\" }";
+	o << R"({ "document": ")" << ref.document << '"';
+	o << R"(, "section": ")" << ref.section << "\"";
+	o << R"(, "TODO": ")" << std::boolalpha << ref.isTodo << "\" }";
 	return o;
 }
+
 
 struct Entry {
 	FileContext fileContext;
 	DocumentRef documentRef;
 };
 
+
 std::ostream & operator<<(std::ostream &o, Entry const &entry) {
 	o << "{\n    \"document\": " << entry.documentRef << ",\n";
 	o << "    \"semantics\": " << entry.fileContext << "\n  }";
 	return o;
 }
+
 
 using Entries = std::vector<Entry>;
 
@@ -89,43 +98,75 @@ std::ostream & operator<<(std::ostream &o, Entries const &entries) {
 }
 
 
-std::optional<DocumentRef> refFromLine(std::string line) {
-//    static const std::regex regex(R"(@ref (\S+) (\S+))");
-//should support everything except  // @ref N4926 1.2:3, N4800 3.4/5, ...
-// this regex could support above, but needs more changes in the way refs are stored
-// ((^| )(TODO\S*|@ref))+ (N[^\s,]+) ([^\s,]+)(, ([^\s,]+) ([^\s,]+))*
-// case insensitive to support TODO|todo n4296|N4296
-    static const std::regex regex(R"(((^| )(TODO\S*|@ref))+ (N\S+) (\S+))",
-            std::regex_constants::icase);
+std::vector<std::string> splitRefSections(const std::string& s) {
+    std::vector<std::string> sections;
+
+    static const std::regex regex(R"((.*)([:\/])([\d\.]+)*(\d+)(?:-([\d\.]+)*(\d+))?)");
     std::smatch result;
-    if (std::regex_search(line, result, regex)) {
-        // this never happens with 2 group regex, it just won't match
-        // can refs even be in this format?
-        if (result.size() == 2)
-            return {DocumentRef{result[1], ""}};
-        if (result.size() == 6)
-            return {DocumentRef{result[4], result[5]}};
+    if (std::regex_search(s, result, regex)) {
+        // example 1.2:3.1-3.4
+        std::string chapter = result[1]; // 1.2
+        std::string delim = result[2]; // :
+        std::string paragraphFromPrefix = result[3]; // 3.
+        std::string paragraphFrom = result[4]; // 1
+        std::string paragraphToPrefix = result[5]; // 3.
+        std::string paragraphTo = result[6]; // 4
+
+        int from = std::stoi(paragraphFrom);
+        int to = paragraphTo.empty() ? from : std::stoi(paragraphTo);
+        for (; from <= to; ++from) {
+            std::string section;
+            section.append(chapter).append(delim).append(paragraphFromPrefix).append(std::to_string(from));
+            sections.emplace_back(section);
+        }
     }
-    return {};
+
+    return sections;
 }
 
-bool lineContainsComment(std::string line) {
+
+void splitRefTags(const std::smatch& result, std::vector<DocumentRef>& refs) {
+    std::vector<std::string> sections = splitRefSections(result[4]);
+    for (const std::string& section : sections) {
+        if (result[2] != "") {
+            refs.emplace_back(DocumentRef{result[2], section, result[1] != ""});
+        }
+        refs.emplace_back(DocumentRef{result[3], section, result[1] != ""});
+    }
+}
+
+
+std::vector<DocumentRef> refsFromLine(const std::string& line) {
+//    static const std::regex regex(R"((TODO)?(?:\S*)? (?:@ref )?(N\d{4})?(?:-)?(N\d{4}) ([^,\s]+))",
+//            std::regex_constants::icase);
+    static const std::regex regex(R"((TODO)?(?:\S*)? (?:@ref )?(N\d{4})?(?:-)?(N\d{4}) ([A-Z0-9][\.\d]*[:\/][\d-\.]+))",
+                                  std::regex_constants::icase);
+    std::vector<DocumentRef> refs;
+
+/*
+ * Capture groups
+ * 1 "TODO" - if not empty, reference was marked as TODO
+ * 2 Secondary tag revision group - if not empty, 2 revision tags in reference
+ * 3 Primary tag revision group - can not be empty
+ * 4 Section group - can not be empty
+ */
+    std::smatch result;
+    auto start = line.cbegin();
+    while (std::regex_search(start, line.cend(), result, regex)) {
+        splitRefTags(result, refs);
+        start = result.suffix().first;
+    }
+
+    return refs;
+}
+
+
+bool lineContainsComment(const std::string& line) {
     static const std::regex regex(R"(//)");
     std::smatch result;
     return std::regex_search(line, result, regex);
 }
 
-//std::optional<DocumentRef> refFromLine(std::string line) {
-//    static const std::regex regex(R"(@ref (\S+) (\S+))");
-//    std::smatch result;
-//    if (std::regex_search(line, result, regex)) {
-//        if (result.size() == 2)
-//            return {DocumentRef{result[1], ""}};
-//        if (result.size() == 3)
-//            return {DocumentRef{result[1], result[2]}};
-//    }
-//    return {};
-//}
 
 void print(std::optional<DocumentRef> ref) {
 	if (ref)
@@ -135,92 +176,105 @@ void print(std::optional<DocumentRef> ref) {
 }
 
 
-//void addEntriesFromIstream(Entries & entries, std::string path, std::istream & is) {
-//	FileContext fc {path, 1};
-//	std::string line;
-//	while(std::getline(is, line)) {
-//		//std::cout << lineNumber << ": " << line << '\n';
-//		std::optional<DocumentRef> ref = refFromLine(line);
-//		//print(ref);
-//		//std::cout << '\n';
-//		if (ref)
-//			entries.push_back(Entry{fc, std::move(ref.value())});
-//
-//		fc.lineNumber++;
-//	}
-//};
+void addRefsToEntries(std::vector<Entry>& refs, Entries& entries) {
+    auto it = std::next(refs.begin(), refs.size());
+    std::move(refs.begin(), it, std::back_inserter(entries));
+    refs.erase(refs.begin(), it);
+}
+
+
+void processLineReferences(bool& commentBlockStart, std::vector<Entry>& commentBlockRefs, Entries& entries,
+        const std::string& path, int lineNumber, std::vector<DocumentRef>& refs) {
+    if (commentBlockStart) {
+        addRefsToEntries(commentBlockRefs, entries);
+        commentBlockStart = false;
+    }
+    for (auto ref : refs) {
+        commentBlockRefs.push_back(Entry{FileContext{path, {Lines{lineNumber, lineNumber}}},
+                                         std::move(ref)});
+    }
+}
+
+
+bool previousLineIsComment(const std::vector<Entry>& commentBlockRefs, int lineNumber) {
+    return commentBlockRefs.back().fileContext.lineNumbers.back().to + 1 != lineNumber;
+}
+
+
+void updateCommentBlockRefLines(bool& commentBlockStart, std::vector<Entry>& commentBlockRefs, int lineNumber) {
+    if (!commentBlockRefs.empty()) {
+        if (previousLineIsComment(commentBlockRefs, lineNumber)) {
+            std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
+                e.fileContext.lineNumbers.emplace_back(Lines{lineNumber, lineNumber});
+            });
+        }
+        else {
+            std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
+                e.fileContext.lineNumbers.back().to = lineNumber;
+            });
+        }
+        commentBlockStart = true;
+    }
+}
+
+
+void processCommentLine(const std::string& line, bool& commentBlockStart, std::vector<Entry>& commentBlockRefs,
+        Entries& entries, const std::string& path, int lineNumber) {
+    std::vector<DocumentRef> refs = refsFromLine(line);
+    if (!refs.empty()) {
+        processLineReferences(commentBlockStart, commentBlockRefs, entries, path, lineNumber, refs);
+    }
+    else {
+        updateCommentBlockRefLines(commentBlockStart, commentBlockRefs, lineNumber);
+    }
+}
+
+
+void processNonCommentLine(std::vector<Entry>& commentBlockRefs, Entries & entries, bool& commentBlockStart) {
+    // if current line is not a comment and last commented line was reference,
+    // the block ends. References are at the top of comment blocks
+    // a comment "block" ending with a reference is a single line reference
+    if (!commentBlockStart) {
+        addRefsToEntries(commentBlockRefs, entries);
+    }
+    commentBlockStart = true;
+}
+
 
 // TODO end commentBlock after a certain amount of rules or a keyword such as endmodule
-void addEntriesFromIstream(Entries & entries, std::string path, std::istream & is) {
-    //FileContext fc {path, {Lines{1,1}}};
+void addEntriesFromIstream(Entries & entries, const std::string& path, std::istream & is) {
     int lineNumber = 1;
     std::vector<Entry> commentBlockRefs;
 
     std::string line;
-    bool commentBlockStart = true;
-    // references are located at the top of the comment block
+    bool commentBlockStart = true; // references are located at the top of the comment block
+
 
     while(std::getline(is, line)) {
         if(lineContainsComment(line)) {
-            std::optional<DocumentRef> ref = refFromLine(line);
-            if (ref) {
-                if (commentBlockStart) {
-                    auto it = std::next(commentBlockRefs.begin(), commentBlockRefs.size());
-                    std::move(commentBlockRefs.begin(), it, std::back_inserter(entries));
-                    commentBlockRefs.erase(commentBlockRefs.begin(), it);
-
-                    commentBlockStart = false;
-                }
-
-                commentBlockRefs.push_back(Entry{FileContext{path, {Lines{lineNumber, lineNumber}}}, std::move(ref.value())});
-            }
-            else {
-                if (!commentBlockRefs.empty()) {
-                    // if the previous line was not a ref comment, add a new range of Lines to entry
-                    if (commentBlockRefs.back().fileContext.lineNumbers.back().to + 1 != lineNumber) {
-                        std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
-                            e.fileContext.lineNumbers.emplace_back(Lines{lineNumber, lineNumber});
-                        });
-                    }
-                    else {
-                        std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
-                            e.fileContext.lineNumbers.back().to = lineNumber;
-                        });
-                    }
-                    commentBlockStart = true;
-                }
-            }
+            processCommentLine(line, commentBlockStart, commentBlockRefs, entries, path, lineNumber);
         }
         else {
-            // if current line is not a comment and last commented line was reference
-            // the block ends, references are at the top of comment blocks
-            // a comment "block" ending with a reference is a single line reference
-            if (!commentBlockStart) {
-                auto it = std::next(commentBlockRefs.begin(), commentBlockRefs.size());
-                std::move(commentBlockRefs.begin(), it, std::back_inserter(entries));
-                commentBlockRefs.erase(commentBlockRefs.begin(), it);
-            }
-            commentBlockStart = true;
+            processNonCommentLine(commentBlockRefs, entries, commentBlockStart);
         }
-
         ++lineNumber;
     }
-    auto it = std::next(commentBlockRefs.begin(), commentBlockRefs.size());
-    std::move(commentBlockRefs.begin(), it, std::back_inserter(entries));
-    commentBlockRefs.erase(commentBlockRefs.begin(), it);
+    addRefsToEntries(commentBlockRefs, entries);
+}
 
-};
 
 // expects "// @ref[...]" format
-bool isReference(std::string comment) {
+bool isReference(const std::string& comment) {
     return comment.substr(0, 4) == "@ref";
 }
+
 
 void addEntry(Entries & entries, FileContext & fc, DocumentRef & dr) {
     entries.push_back(Entry{fc, dr});
 }
 
-DocumentRef createRef(std::string comment) {
+
+DocumentRef createRef(const std::string& comment) {
     static const std::regex regex(R"(@ref (\S+) (\S+))");
     std::smatch result;
     if (std::regex_search(comment, result, regex)) {
@@ -231,7 +285,7 @@ DocumentRef createRef(std::string comment) {
 }
 
 
-void addEntriesFromRegularFile(Entries & entries, fs::path filepath) {
+void addEntriesFromRegularFile(Entries & entries, const fs::path& filepath) {
 	// Ignore files not matching '*.k'
 	if (filepath.extension() != ".k" && filepath.extension() != ".C")
 		return;
@@ -242,7 +296,8 @@ void addEntriesFromRegularFile(Entries & entries, fs::path filepath) {
 	addEntriesFromIstream(entries, filepath.string(), is);
 }
 
-void addEntriesFromDirectory(Entries & entries, fs::path dirpath) {
+
+void addEntriesFromDirectory(Entries & entries, const fs::path& dirpath) {
 	for(auto& current: fs::recursive_directory_iterator(dirpath)) {
 		addEntriesFromRegularFile(entries, current);
 	}
@@ -250,7 +305,7 @@ void addEntriesFromDirectory(Entries & entries, fs::path dirpath) {
 }
 
 
-void addEntriesFromPath(Entries & entries, fs::path p) {
+void addEntriesFromPath(Entries & entries, const fs::path& p) {
 	if (fs::is_regular_file(p))
 		return addEntriesFromRegularFile(entries, p);
 
@@ -258,14 +313,15 @@ void addEntriesFromPath(Entries & entries, fs::path p) {
 		return addEntriesFromDirectory(entries, p);
 }
 
-Entries entriesFromPath(fs::path path) {
+
+Entries entriesFromPath(const fs::path& path) {
 	Entries entries;
 	addEntriesFromPath(entries, path);
 	return entries;
 }
 
+
 int main(int argc, char *argv[]) {
-    std::string x = "hello";
 	if (argc != 2) {
 		std::cerr << "Usage: " << argv[0] << " <path>\n";
 		return 1;
