@@ -181,17 +181,26 @@ void addRefsToEntries(std::vector<Entry>& refs, Entries& entries) {
 }
 
 
+std::string splitPath(const std::string& path) {
+    static const std::regex regex(R"(c-semantics.*)");
+    std::smatch result;
+    ;
+
+    return std::regex_search(path, result, regex) ? result[0] : path;
+}
+
+
 void processLineReferences(std::vector<Entry>& commentBlockRefs, Entries& entries,
         const std::string& path, int lineNumber, std::vector<DocumentRef>& refs) {
     for (auto& ref : refs) {
-        commentBlockRefs.push_back(Entry{FileContext{path, {Lines{lineNumber, lineNumber}}},
+        commentBlockRefs.push_back(Entry{FileContext{splitPath(path), {Lines{lineNumber, lineNumber}}},
                                          std::move(ref)});
     }
 }
 
 
 bool previousLineIsComment(const std::vector<Entry>& commentBlockRefs, int lineNumber) {
-    return commentBlockRefs.back().fileContext.lineNumbers.back().to + 1 != lineNumber;
+    return commentBlockRefs.back().fileContext.lineNumbers.back().to + 1 == lineNumber;
 }
 
 
@@ -199,12 +208,12 @@ void updateCommentBlockRefLines(std::vector<Entry>& commentBlockRefs, int lineNu
     if (!commentBlockRefs.empty()) {
         if (previousLineIsComment(commentBlockRefs, lineNumber)) {
             std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
-                e.fileContext.lineNumbers.emplace_back(Lines{lineNumber, lineNumber});
+                e.fileContext.lineNumbers.back().to = lineNumber;
             });
         }
         else {
             std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
-                e.fileContext.lineNumbers.back().to = lineNumber;
+                e.fileContext.lineNumbers.emplace_back(Lines{lineNumber, lineNumber});
             });
         }
     }
@@ -239,8 +248,8 @@ bool lineIsWhiteSpace(const std::string& line) {
 }
 
 
-// assumes there's always a space between comment blocks and commentblocks start
-// with a reference
+// assumes there's always a space between comment blocks and that
+// comment blocks start with a reference
 void addEntriesFromIstream(Entries & entries, const std::string& path, std::istream & is) {
     int lineNumber = 1;
     std::vector<Entry> commentBlockRefs;
