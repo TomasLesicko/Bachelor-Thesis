@@ -137,8 +137,6 @@ void splitRefTags(const std::smatch& result, std::vector<DocumentRef>& refs) {
 
 
 std::vector<DocumentRef> refsFromLine(const std::string& line) {
-//    static const std::regex regex(R"((TODO)?(?:\S*)? (?:@ref )?(N\d{4})?(?:-)?(N\d{4}) ([^,\s]+))",
-//            std::regex_constants::icase);
     static const std::regex regex(R"((TODO)?(?:\S*)? (?:@ref )?(N\d{4})?(?:-)?(N\d{4}) ([A-Z0-9][\.\d]*[:\/][\d-\.]+))",
                                   std::regex_constants::icase);
     std::vector<DocumentRef> refs;
@@ -183,13 +181,9 @@ void addRefsToEntries(std::vector<Entry>& refs, Entries& entries) {
 }
 
 
-void processLineReferences(bool& commentBlockStart, std::vector<Entry>& commentBlockRefs, Entries& entries,
+void processLineReferences(std::vector<Entry>& commentBlockRefs, Entries& entries,
         const std::string& path, int lineNumber, std::vector<DocumentRef>& refs) {
-    if (commentBlockStart) {
-        addRefsToEntries(commentBlockRefs, entries);
-        commentBlockStart = false;
-    }
-    for (auto ref : refs) {
+    for (auto& ref : refs) {
         commentBlockRefs.push_back(Entry{FileContext{path, {Lines{lineNumber, lineNumber}}},
                                          std::move(ref)});
     }
@@ -201,7 +195,7 @@ bool previousLineIsComment(const std::vector<Entry>& commentBlockRefs, int lineN
 }
 
 
-void updateCommentBlockRefLines(bool& commentBlockStart, std::vector<Entry>& commentBlockRefs, int lineNumber) {
+void updateCommentBlockRefLines(std::vector<Entry>& commentBlockRefs, int lineNumber) {
     if (!commentBlockRefs.empty()) {
         if (previousLineIsComment(commentBlockRefs, lineNumber)) {
             std::for_each(commentBlockRefs.begin(), commentBlockRefs.end(), [&lineNumber](Entry& e) {
@@ -213,52 +207,59 @@ void updateCommentBlockRefLines(bool& commentBlockStart, std::vector<Entry>& com
                 e.fileContext.lineNumbers.back().to = lineNumber;
             });
         }
-        commentBlockStart = true;
     }
 }
 
 
-void processCommentLine(const std::string& line, bool& commentBlockStart, std::vector<Entry>& commentBlockRefs,
+void processCommentLine(const std::string& line, std::vector<Entry>& commentBlockRefs,
         Entries& entries, const std::string& path, int lineNumber) {
     std::vector<DocumentRef> refs = refsFromLine(line);
     if (!refs.empty()) {
-        processLineReferences(commentBlockStart, commentBlockRefs, entries, path, lineNumber, refs);
+        processLineReferences(commentBlockRefs, entries, path, lineNumber, refs);
     }
     else {
-        updateCommentBlockRefLines(commentBlockStart, commentBlockRefs, lineNumber);
+        updateCommentBlockRefLines(commentBlockRefs, lineNumber);
     }
 }
 
 
-void processNonCommentLine(std::vector<Entry>& commentBlockRefs, Entries & entries, bool& commentBlockStart) {
-    // if current line is not a comment and last commented line was reference,
-    // the block ends. References are at the top of comment blocks
-    // a comment "block" ending with a reference is a single line reference
-    if (!commentBlockStart) {
-        addRefsToEntries(commentBlockRefs, entries);
-    }
-    commentBlockStart = true;
+void processNonCommentLine(const std::string& line, std::vector<Entry>& commentBlockRefs, Entries & entries) {
+    ;
 }
 
 
-// TODO end commentBlock after a certain amount of rules or a keyword such as endmodule
+bool lineIsWhiteSpace(const std::string& line) {
+    for (int c : line) {
+        if (!isspace(c)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+// assumes there's always a space between comment blocks and commentblocks start
+// with a reference
 void addEntriesFromIstream(Entries & entries, const std::string& path, std::istream & is) {
     int lineNumber = 1;
     std::vector<Entry> commentBlockRefs;
 
     std::string line;
-    bool commentBlockStart = true; // references are located at the top of the comment block
-
 
     while(std::getline(is, line)) {
-        if(lineContainsComment(line)) {
-            processCommentLine(line, commentBlockStart, commentBlockRefs, entries, path, lineNumber);
+        if (lineIsWhiteSpace(line)) {
+            addRefsToEntries(commentBlockRefs, entries);
+        }
+        else if(lineContainsComment(line)) {
+            processCommentLine(line, commentBlockRefs, entries, path, lineNumber);
         }
         else {
-            processNonCommentLine(commentBlockRefs, entries, commentBlockStart);
+            processNonCommentLine(line, commentBlockRefs, entries);
         }
         ++lineNumber;
     }
+
     addRefsToEntries(commentBlockRefs, entries);
 }
 
@@ -301,7 +302,6 @@ void addEntriesFromDirectory(Entries & entries, const fs::path& dirpath) {
 	for(auto& current: fs::recursive_directory_iterator(dirpath)) {
 		addEntriesFromRegularFile(entries, current);
 	}
-
 }
 
 
