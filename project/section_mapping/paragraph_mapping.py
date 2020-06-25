@@ -1,7 +1,8 @@
 import os.path
 import sys
 import re
-from tika import parser, tika
+import tika
+from tika import parser
 import json
 import difflib
 
@@ -31,7 +32,8 @@ def read_referenced_revisions(revision_set):
         print("\tLoading %s" % revision_tag)
         try:
             tika.TikaClientOnly = True
-            contents = parser.from_file(path, "http://localhost:9997/")["content"]  # TODO retrieval bugfix on fresh start
+            contents = parser.from_file(path, "http://localhost:9997/")["content"]
+
             revisions_text_dict[revision_tag] = contents
         except FileNotFoundError as fnfe:
             print(fnfe)

@@ -10,15 +10,24 @@ SECTIONS_LINE_PARSING_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:.+)\n'
 
 
 def load_references():
+    # try:
+    #     print("Retrieving references.json from GitHub repository")
+    #     with urlopen(
+    #             "https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
+    #         references = json.loads(url.read())
+    #         return references
+    # except URLError as urle:
+    #     print(urle)
+    #     print("Failed to retrieve references.json from GitHub repository")
+    #     return {}
     try:
-        print("Retrieving references.json from GitHub repository")
-        with urlopen(
-                "https://raw.githubusercontent.com/TomasLesicko/Bachelor-Thesis/master/project/references/references.json") as url:
-            references = json.loads(url.read())
-            return references
-    except URLError as urle:
-        print(urle)
-        print("Failed to retrieve references.json from GitHub repository")
+        print("Opening references.json")
+        with open("../references/references.json", 'r') as references:
+            referencesJSON = json.loads(references.read())
+            return referencesJSON
+    except FileNotFoundError as fnfe:
+        print(fnfe)
+        print("Failed to find references.json")
         return {}
 
 

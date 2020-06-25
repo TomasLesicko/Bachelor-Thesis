@@ -46,7 +46,7 @@ struct FileContext {
 
 std::ostream & operator<<(std::ostream &o, FileContext const &fc) {
 	o << R"({ "file": ")" << fc.fileName;
-	o << R"(", "lines": ")" << /*fc.lineNumber*/fc.lineNumbers << "\" }";
+	o << R"(", "lines": [ )" << /*fc.lineNumber*/fc.lineNumbers << " ] }";
 	return o;
 }
 
