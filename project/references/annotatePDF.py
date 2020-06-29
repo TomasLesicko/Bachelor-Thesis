@@ -9,6 +9,8 @@ import paragraph_mapping
 
 from shutil import copy2
 
+ANNOT_COLOR = {"stroke":(0, 0.8, 0), "fill":(0, 0, 0)}
+
 CHAPTER_START_REGEX = ".*\[.*\]$"
 
 commentInfoIconOffsetX = 10
@@ -61,13 +63,31 @@ def set_annot_contents(ref):
     return annot_contents
 
 
-def annotate_section(page, rect, ref):
-    colors = {"stroke":(0, 0.8, 0), "fill":(0, 0, 0)}
-    annot_contents = set_annot_contents(ref)
+def find_paragraph_annot(page, rect):
+    annot = page.firstAnnot
 
-    
-    annot = page.addTextAnnot((rect[2] + commentInfoIconOffsetX, rect[1]), annot_contents, "Comment")
-    annot.setColors(colors)
+    while annot:
+        top_left = annot.rect.tl
+        # for some reason the annots get moved by 1
+        if top_left.x - 1 == rect[2] + commentInfoIconOffsetX and top_left.y - 1 == rect[1]:
+            return annot
+
+        annot = annot.next
+
+    return None
+
+
+def annotate_section(page, rect, ref):
+    annot_contents = set_annot_contents(ref)
+    annot = find_paragraph_annot(page, rect)
+
+    if annot:
+        content = annot.info["content"]
+        new_content = "\n----------------------------\n" + annot_contents
+        annot.setInfo(content=content+new_content)
+    else:
+        annot = page.addTextAnnot((rect[2] + commentInfoIconOffsetX, rect[1]), annot_contents, "Comment")
+        annot.setColors(ANNOT_COLOR)
     annot.update()
 
 
