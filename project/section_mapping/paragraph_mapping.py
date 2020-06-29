@@ -5,13 +5,14 @@ import tika
 from tika import parser
 import json
 import difflib
+from urllib.error import URLError
 
 import chapter_mapping
 
 # (?:(?:^\d+\)(?:(?!^\d+\)).*\n)*)*(?:§ \d+(?:\.\d+)*) \d+$\s+c©ISO\/IEC N\d+)
 
-DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.6
-DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD = 0.4
+DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.7
+DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD = 0.55
 DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE = 0.05
 
 SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
@@ -28,7 +29,13 @@ CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
 CHAPTER_PARSING_REGEX_BRACKET_ID = r"(.+)"
 
 
-def read_referenced_revisions(revision_set, host_num):
+def handle_error(e, msg):
+    print(e)
+    print(msg)
+    raise e
+
+
+def read_referenced_revisions(revision_set, port_num):
     revisions_text_dict = {}
     print("Loading text versions of referenced revisions")
 
@@ -38,13 +45,13 @@ def read_referenced_revisions(revision_set, host_num):
         print("\tLoading %s" % revision_tag)
         try:
             tika.TikaClientOnly = True
-            contents = parser.from_file(path, "http://localhost:" + host_num + "/")["content"]
+            contents = parser.from_file(path, "http://localhost:" + port_num + "/")["content"]
 
             revisions_text_dict[revision_tag] = contents
         except FileNotFoundError as fnfe:
-            print(fnfe)
-            print("Could not find revision %s in draft/papers" % revision_tag)
-            raise fnfe
+            handle_error(fnfe, "[Error] Could not find revision %s.pdf in draft/papers" % revision_tag)
+        except URLError as urle:
+            handle_error(urle, "[Error] Wrong port number: %s" % port_num)
 
     return revisions_text_dict
 
@@ -72,14 +79,14 @@ def extract_paragraph_text(revision_text, referenced_section):
     referenced_chapter_match = find_referenced_chapter_text(revision_text, referenced_chapter)
 
     if not referenced_chapter_match:
-        return None, None
+        return (None, None)
 
     referenced_chapter_bracket_id = referenced_chapter_match[0][1]
     referenced_chapter_text = referenced_chapter_match[0][2]
 
     referenced_paragraph_match = find_referenced_paragraph_text(referenced_chapter_text, referenced_paragraph)
     if not referenced_paragraph_match:
-        return None, None
+        return (None, None)
 
     return referenced_paragraph_match[0][1], referenced_chapter_bracket_id
 
@@ -101,6 +108,7 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
     for chapter in target_revision_chapters:
         target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, chapter[2], re.M)
         # TODO match paragraphs correctly if they're split by new page
+        ratios = []
 
         for paragraph in target_chapter_paragraphs:
 
@@ -108,24 +116,31 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
             ratio1 = matcher.ratio()
             # ratio2 = matcher.quick_ratio()
             # ratio3 = matcher.real_quick_ratio()
+            ratios.append(ratio1)
 
             if ratio1 > threshold: similar_paragraphs.append((chapter[0], paragraph, ratio1))
             # if ratio2 > 0.9: similar_paragraphs.append((c[0], paragraph, ratio2))
         # TODO try to obtain the diff text in readable format and display the diff in annotation
+
+        if not similar_paragraphs: # paragraphs under ~0.45 are too different
+            x = 3
+        maxx = max(ratios)
+        if maxx > DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD:
+            print("a")
 
     if similar_paragraphs:
         most_similar = find_most_similar_paragraph(similar_paragraphs)
         return most_similar[0] + ":" + most_similar[1][1]
 
     # if no similar paragraph was found, retry with lower ratio threshold
-    if threshold > DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD:
-        print("\tCouldn't match referenced paragraph, retrying with lower match ratio (%s)\n\tReference:\n\t%s %s:%s"
-              % (round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2), referenced_revision_tag,
-                 referenced_section[0],
-                 referenced_section[1]))
-        return target_revision_find_paragraph_id(target_revision_chapters, paragraph_text,
-                                                 round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2),
-                                                 referenced_revision_tag, referenced_section)
+    # if threshold > DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD:
+    #     print("\tCouldn't match referenced paragraph, retrying with lower match ratio (%s)\n\tReference:\n\t%s %s:%s"
+    #           % (round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2), referenced_revision_tag,
+    #              referenced_section[0],
+    #              referenced_section[1]))
+    #     return target_revision_find_paragraph_id(target_revision_chapters, paragraph_text,
+    #                                              round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2),
+    #                                              referenced_revision_tag, referenced_section)
 
     print("\tFailed to match referenced paragraph with minimum allowed match ratio (%s)\n\tReference:\n\t%s %s:%s" %
           (DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD, referenced_revision_tag, referenced_section[0],
@@ -196,18 +211,22 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
     chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
 
     revisions_text_dict = read_referenced_revisions(revision_set, port_num)
+
     with open("referenceErrors.json", 'w') as ref_error_json:
         ref_errors = []
         process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag, ref_errors)
         if ref_errors:
             json.dump(ref_errors, ref_error_json, indent=4)
+
+    with open("references_mapped_%s.json" % target_revision_tag, "w") as mapped_references:
+        json.dump(references, mapped_references, indent=4)
     return references
 
 
 def main(argv):
     try:
         references = map_paragraphs_to_target_revision(sys.argv[1], sys.argv[2])  # TODO argparse lib, progressbar?
-    except (IndexError, FileNotFoundError) as e:
+    except (IndexError, FileNotFoundError, URLError):
         print("Usage: \"paragraphMapping.py <tag> <port number>\"\ne.g. \"paragraphMapping.py n4296 9997\"")
 
     # try:
