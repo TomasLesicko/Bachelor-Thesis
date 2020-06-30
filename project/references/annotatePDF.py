@@ -11,7 +11,7 @@ import paragraph_mapping
 
 from shutil import copy2
 
-ANNOT_COLOR = {"stroke":(0, 0.8, 0)}
+ANNOT_DEFAULT_COLOR = {"stroke":(0, 0.8, 0)}
 
 CHAPTER_START_REGEX = ".*\[.*\]$"
 
@@ -49,22 +49,13 @@ def find_referenced_section_page_number(doc, section, toc_page_count):
 
 def highlight_section(page, rect, ref):
     annot = page.addHighlightAnnot(rect)
-    color_intensity = ref["similarity"] * ref["similarity"]
+    color_intensity = ref["similarity"]
     if ref["document"]["TODO"] == "true":
-        annot.setColors(stroke=(color_intensity, 0, 0))
+        annot.setColors(stroke=(color_intensity, color_intensity, 0))
     else:
         annot.setColors(stroke=(0, color_intensity, 0))
     # even better, create a threshold like 0.8 where it's green, 0.6 yellow, 0.4 orange
     # and a way to force the reference to be greeen once manually checked
-
-
-def set_annot_similarity_description(similarity):
-    if similarity == 1.0:
-        return "identical"
-    elif similarity >= 0.9:
-        return "similar"
-    elif similarity >= 0.7:
-        return ""
 
 
 def set_annot_contents(ref):
@@ -101,7 +92,7 @@ def annotate_section(page, rect, ref):
         annot.setInfo(content=content+new_content)
     else:
         annot = page.addTextAnnot((rect[2] + commentInfoIconOffsetX, rect[1]), annot_contents, "Comment")
-        annot.setColors(ANNOT_COLOR)
+        annot.setColors(ANNOT_DEFAULT_COLOR)
     annot.update()
 
 
@@ -158,8 +149,6 @@ def process_reference(doc, ref):
 
 
 def annotate_document(doc, target_pdf_tag, port_num):
-    print("processing references")
-
     try:
         with open("references_mapped_%s.json" % target_pdf_tag, "r") as r:
             references = json.loads(r.read())
@@ -167,6 +156,7 @@ def annotate_document(doc, target_pdf_tag, port_num):
         print("references_mapped_%s.json" % target_pdf_tag + " not found, attempting to map references")
         references = paragraph_mapping.map_paragraphs_to_target_revision(target_pdf_tag, port_num)
     finally:
+        print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
         for ref in references:
             process_reference(doc, ref)
 
@@ -176,6 +166,7 @@ def annotate_document(doc, target_pdf_tag, port_num):
 
 
 def copy_target_pdf(tag):
+    print("Creating a copy of %s.pdf" % tag)
     if tag[-4:].lower() != ".pdf":
         tag += ".pdf"
     path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/', tag)
