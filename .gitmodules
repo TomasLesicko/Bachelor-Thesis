@@ -1,3 +1,6 @@
 [submodule "draft"]
 	path = draft
 	url = https://github.com/cplusplus/draft
+[submodule "c-semantics"]
+	path = c-semantics
+	url = https://github.com/kframework/c-semantics.git

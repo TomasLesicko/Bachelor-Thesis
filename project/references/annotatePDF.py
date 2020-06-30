@@ -5,6 +5,8 @@ import json
 import re
 import sys
 
+sys.path.append("../section_mapping")
+#import paragraph_mapping
 import paragraph_mapping
 
 from shutil import copy2
@@ -45,17 +47,31 @@ def find_referenced_section_page_number(doc, section, toc_page_count):
     return int(section_page)
 
 
-def highlight_section(page, rect):
+def highlight_section(page, rect, ref):
     annot = page.addHighlightAnnot(rect)
-    annot.setColors(stroke=(0, 0.7, 0)) # TODO shade depenting on similarity 1 = darkest
+    color_intensity = ref["similarity"] * ref["similarity"]
+    if ref["document"]["TODO"] == "true":
+        annot.setColors(stroke=(color_intensity, 0, 0))
+    else:
+        annot.setColors(stroke=(0, color_intensity, 0))
     # even better, create a threshold like 0.8 where it's green, 0.6 yellow, 0.4 orange
     # and a way to force the reference to be greeen once manually checked
+
+
+def set_annot_similarity_description(similarity):
+    if similarity == 1.0:
+        return "identical"
+    elif similarity >= 0.9:
+        return "similar"
+    elif similarity >= 0.7:
+        return ""
 
 
 def set_annot_contents(ref):
     annot_contents = ref["semantics"]["file"] + "\n" + str(ref["semantics"]["lines"])
     if ref["document"]["TODO"] == "true":
         annot_contents += "\nMarked as TODO"
+    annot_contents += "\n" + str(round(100 * float(ref["similarity"]), 2)) + "% match with paragraph in referenced revision"
 
     return annot_contents
 
@@ -85,7 +101,6 @@ def annotate_section(page, rect, ref):
         annot.setInfo(content=content+new_content)
     else:
         annot = page.addTextAnnot((rect[2] + commentInfoIconOffsetX, rect[1]), annot_contents, "Comment")
-        print(ref["document"]["section"])
         annot.setColors(ANNOT_COLOR)
     annot.update()
 
@@ -128,18 +143,18 @@ def find_toc_page_count(doc):
 
 
 def process_reference(doc, ref):
-    section = re.split("[:/]", ref["document"]["section"])
-    toc_page_count = find_toc_page_count(doc)
-    page_number = find_referenced_section_page_number(doc, section, toc_page_count)
+    if not ref["error"]:
+        section = re.split("[:/]", ref["document"]["section"])
+        toc_page_count = find_toc_page_count(doc)
+        page_number = find_referenced_section_page_number(doc, section, toc_page_count)
 
-    pageRect = find_referenced_paragraph_page(doc, page_number, toc_page_count, section, 0, False)
+        pageRect = find_referenced_paragraph_page(doc, page_number, toc_page_count, section, 0, False)
 
-    if pageRect[0] is not None and pageRect[1] is not None:
-        highlight_section(pageRect[0], pageRect[1])
-        annotate_section(pageRect[0], pageRect[1], ref)
-        x = 0
-    else:
-        x = 0 # handle faulty stuff somehow
+        if pageRect[0] is not None and pageRect[1] is not None:
+            highlight_section(pageRect[0], pageRect[1], ref)
+            annotate_section(pageRect[0], pageRect[1], ref)
+        else:
+            x = 0 # handle faulty stuff somehow
 
 
 def annotate_document(doc, target_pdf_tag, port_num):
