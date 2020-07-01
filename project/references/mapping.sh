@@ -6,6 +6,7 @@ else
     echo Could not find references.json, attempting to extract references from semantics
     if  ! [ -e referenceExtractor.out ]
     then
+        echo "compiling referenceExtractor.cpp"
         g++ referenceExtractor.cpp -std=c++17 -lstdc++fs -o referenceExtractor.out
     fi
     ./referenceExtractor.out ../../c-semantics/semantics/cpp

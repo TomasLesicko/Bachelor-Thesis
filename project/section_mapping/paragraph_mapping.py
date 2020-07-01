@@ -1,13 +1,13 @@
-import os.path
 import sys
 import re
-import tika
-from tika import parser
 import json
 import difflib
 from urllib.error import URLError
 
 import chapter_mapping
+
+sys.path.append("../tools")
+from revision_PDF_to_txt import read_referenced_revision
 
 # (?:(?:^\d+\)(?:(?!^\d+\)).*\n)*)*(?:§ \d+(?:\.\d+)*) \d+$\s+c©ISO\/IEC N\d+)
 
@@ -17,7 +17,8 @@ DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE = 0.05
 
 SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 
-PARAGRAPH_PARSING_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
+#PARAGRAPH_PARSING_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
+PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(?:^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
 
 # (^(\d+(?:\.\d+)* )|^—\((\d+(?:\.\d+)*)\) )([\s\S]+?)(?=(^—\((\d+(?:\.\d+)*)\) |^(\d+(?:\.\d+)* )|\Z))
 NEW_PAGE_REDUNDANT_CHARS = r"(?:(?:^\d+\)[\s\S]+?)?.*\s+c©ISO\/IEC N\d+)"
@@ -29,29 +30,17 @@ CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
 CHAPTER_PARSING_REGEX_BRACKET_ID = r"(.+)"
 
 
-def handle_error(e, msg):
-    print(e)
-    print(msg)
-    raise e
-
-
-def read_referenced_revisions(revision_set, port_num):
+def load_txt_revisions(revision_set, port_num):
     revisions_text_dict = {}
     print("Loading text versions of referenced revisions")
 
     for revision_tag in revision_set:
-        path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/',
-                            revision_tag.lower() + ".pdf")
-        print("\tLoading %s" % revision_tag)
         try:
-            tika.TikaClientOnly = True
-            contents = parser.from_file(path, "http://localhost:" + port_num + "/")["content"]
-
-            revisions_text_dict[revision_tag] = contents
-        except FileNotFoundError as fnfe:
-            handle_error(fnfe, "[Error] Could not find revision %s.pdf in draft/papers" % revision_tag)
-        except URLError as urle:
-            handle_error(urle, "[Error] Wrong port number: %s" % port_num)
+            txt_revision = open("%s.txt" % revision_tag, "r")
+            print("\tLoading %s" % revision_tag)
+            revisions_text_dict[revision_tag] = txt_revision.read()
+        except FileNotFoundError:
+            revisions_text_dict[revision_tag] = read_referenced_revision(revision_tag, port_num)
 
     return revisions_text_dict
 
@@ -73,6 +62,8 @@ def find_referenced_paragraph_text(referenced_chapter_text, referenced_paragraph
 
 
 def extract_paragraph_text(revision_text, referenced_section):
+    if referenced_section[0] == "7.6.1.8":
+        x = 0
     referenced_chapter = referenced_section[0]
     referenced_paragraph = referenced_section[1]
 
@@ -88,7 +79,7 @@ def extract_paragraph_text(revision_text, referenced_section):
     if not referenced_paragraph_match:
         return (None, None)
 
-    return referenced_paragraph_match[0][1], referenced_chapter_bracket_id
+    return referenced_paragraph_match[0][0], referenced_chapter_bracket_id
 
 
 def find_most_similar_paragraph(similar_paragraphs):
@@ -112,25 +103,21 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
 
         for paragraph in target_chapter_paragraphs:
 
-            matcher = difflib.SequenceMatcher(None, paragraph_text, paragraph[2], autojunk=False)
+            matcher = difflib.SequenceMatcher(None, paragraph_text, paragraph[1], autojunk=False)
             ratio1 = matcher.ratio()
             # ratio2 = matcher.quick_ratio()
             # ratio3 = matcher.real_quick_ratio()
             ratios.append(ratio1)
 
-            if ratio1 > threshold: similar_paragraphs.append((chapter[0], paragraph, ratio1))
-            # if ratio2 > 0.9: similar_paragraphs.append((c[0], paragraph, ratio2))
+            if ratio1 > threshold:
+                similar_paragraphs.append((chapter[0], paragraph, ratio1))
+            # if ratio2 > 0.9:
+                # similar_paragraphs.append((c[0], paragraph, ratio2))
         # TODO try to obtain the diff text in readable format and display the diff in annotation
-
-        if not similar_paragraphs: # paragraphs under ~0.45 are too different
-            x = 3
-        maxx = max(ratios)
-        if maxx > DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD:
-            print("a")
 
     if similar_paragraphs:
         most_similar = find_most_similar_paragraph(similar_paragraphs)
-        return most_similar[0] + ":" + most_similar[1][1]
+        return most_similar
 
     # if no similar paragraph was found, retry with lower ratio threshold
     # if threshold > DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD:
@@ -142,9 +129,9 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
     #                                              round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2),
     #                                              referenced_revision_tag, referenced_section)
 
-    print("\tFailed to match referenced paragraph with minimum allowed match ratio (%s)\n\tReference:\n\t%s %s:%s" %
-          (DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD, referenced_revision_tag, referenced_section[0],
-           referenced_section[1]))
+    # print("\tFailed to match referenced paragraph with minimum allowed match ratio (%s)\n\tReference: %s %s:%s" %
+    #       (DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD, referenced_revision_tag, referenced_section[0],
+    #        referenced_section[1]))
     return ""
 
 
@@ -153,8 +140,6 @@ def target_revision_find_section_id(target_revision_text, referenced_paragraph_t
     regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_BRACKET_ID,
                                           r"(" + re.escape(referenced_chapter_id) + r")", 1)
 
-    if referenced_revision_tag == "n4778" and "/".join(referenced_section) == "6.2/8":
-        x = 0
     presumed_target_text_chapter = re.findall(regex, target_revision_text, re.M)
     if presumed_target_text_chapter:
         chapters = presumed_target_text_chapter
@@ -178,8 +163,23 @@ def process_referenced_paragraphs(references, revisions_text_dict, target_revisi
     for reference in references:
         referenced_revision_tag = reference["document"]["document"].lower()
 
-        if referenced_revision_tag != target_revision_tag:
+        if referenced_revision_tag == target_revision_tag:
 
+            referenced_section = re.split("[:/]", reference["document"]["section"])
+            if referenced_section is None or len(referenced_section) != 2:
+                process_reference_error(reference, ref_errors, "Unsupported section format")
+                continue
+
+            referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(
+                revisions_text_dict[referenced_revision_tag], referenced_section)
+            if referenced_paragraph_text is None:
+                process_reference_error(reference, ref_errors, "Failed to locate referenced section in referenced"
+                                                               " revision (%s)" % referenced_revision_tag)
+                continue
+
+            reference["similarity"] = 1.0
+            reference["error"] = ""
+        else:
             referenced_section = re.split("[:/]", reference["document"]["section"])
             if referenced_section is None or len(referenced_section) != 2:
                 process_reference_error(reference, ref_errors, "Unsupported section format")
@@ -197,7 +197,10 @@ def process_referenced_paragraphs(references, revisions_text_dict, target_revisi
                                                                          referenced_chapter_bracket_id,
                                                                          referenced_revision_tag, referenced_section)
             if target_revision_section_id:
-                reference["document"]["section"] = target_revision_section_id
+                #most_similar[0] + ":" + most_similar[1][1], most_similar[2]
+                reference["document"]["section"] = target_revision_section_id[0] + ":" + target_revision_section_id[1][0]
+                reference["similarity"] = target_revision_section_id[2]
+                reference["error"] = ""
             else:
                 process_reference_error(reference, ref_errors, "Failed to locate referenced section in target"
                                                                " revision (%s)" % target_revision_tag)
@@ -210,15 +213,17 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
     references = chapter_mapping.load_references()
     chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
 
-    revisions_text_dict = read_referenced_revisions(revision_set, port_num)
+    revisions_text_dict = load_txt_revisions(revision_set, port_num)
 
     with open("referenceErrors.json", 'w') as ref_error_json:
         ref_errors = []
         process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag, ref_errors)
         if ref_errors:
+            print("Some references could not be mapped, for details, check referenceErrors.json")
             json.dump(ref_errors, ref_error_json, indent=4)
 
     with open("references_mapped_%s.json" % target_revision_tag, "w") as mapped_references:
+        print("Saving mapped references")
         json.dump(references, mapped_references, indent=4)
     return references
 

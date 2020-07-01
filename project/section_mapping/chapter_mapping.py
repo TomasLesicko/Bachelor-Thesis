@@ -27,7 +27,8 @@ def load_references():
             return referencesJSON
     except FileNotFoundError as fnfe:
         print(fnfe)
-        print("Failed to find references.json")
+        print("Failed to find references.json, attempting to extract references from semantics")
+
         return {}
 
 
