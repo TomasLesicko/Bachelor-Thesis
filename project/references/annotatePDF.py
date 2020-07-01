@@ -67,14 +67,11 @@ def set_annot_contents(ref):
     return annot_contents
 
 
-def find_paragraph_annot(page, rect):
+def find_paragraph_annot(page, section):
     annot = page.firstAnnot
 
     while annot:
-        top_left = annot.rect.tl
-        # for some reason the annots get moved by 1
-        # set section when creating annot then just compare sections
-        if top_left.x - 1 == rect[2] + commentInfoIconOffsetX and top_left.y - 1 == rect[1]:
+        if annot.info["title"] == section:
             return annot
 
         annot = annot.next
@@ -84,7 +81,7 @@ def find_paragraph_annot(page, rect):
 
 def annotate_section(page, rect, ref):
     annot_contents = set_annot_contents(ref)
-    annot = find_paragraph_annot(page, rect)
+    annot = find_paragraph_annot(page, ref["document"]["section"])
 
     if annot:
         content = annot.info["content"]
@@ -92,6 +89,7 @@ def annotate_section(page, rect, ref):
         annot.setInfo(content=content+new_content)
     else:
         annot = page.addTextAnnot((rect[2] + commentInfoIconOffsetX, rect[1]), annot_contents, "Comment")
+        annot.setInfo(title=ref["document"]["section"])
         annot.setColors(ANNOT_DEFAULT_COLOR)
     annot.update()
 
@@ -172,14 +170,17 @@ def copy_target_pdf(tag):
     path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/', tag)
     copy2(path, os.getcwd())
 
-    return fitz.open(tag)
+    renamed_tag = tag.split(".")[0] + "_annotated.pdf"
+    os.rename(tag, renamed_tag)
+
+    return fitz.open(renamed_tag)
 
 def main(argv):
     try:
         target_PDF = copy_target_pdf(argv[1].lower())
         annotate_document(target_PDF, argv[1].lower(), argv[2])
     except (RuntimeError, IndexError):
-        print("Usage: \"annotatePDF.py <tag> <port number>\"\ne.g. \"annotatePDF.py n4296 9997\"")
+        print("annotatePDF arguments required: \"<tag> <port number>\"\ne.g. \"n4296 9997\"")
 
 
 if __name__ == "__main__":
