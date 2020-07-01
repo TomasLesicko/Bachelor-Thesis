@@ -1,9 +1,9 @@
 .idea/
-**/__pycache__
-project/section_mapping/reference*
+/**/__pycache__
+/project/section_mapping/reference*
 /project/references/*.pdf
 /project/references/*.out
-/project/references/references_mapped_*.json
+/project/references/*.json
 /project/tools/*.txt
 /project/references/*.txt
 /project/section_mapping/*.txt
