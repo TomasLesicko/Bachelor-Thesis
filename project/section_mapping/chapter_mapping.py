@@ -32,7 +32,7 @@ def load_references():
         return {}
 
 
-def extract_revision_tag_list_from_references(references, revision_set):
+def find_referenced_revision_tags(references, revision_set):
     """Store all revision tags from references to revision_set.
 
     The references in references.json are extracted from different C++ 
@@ -97,7 +97,7 @@ def main(argv):
         older_revision_sections = {}
         references = load_references()
 
-        extract_revision_tag_list_from_references(references, revision_set)
+        find_referenced_revision_tags(references, revision_set)
         read_target_revision_sections(argv[1], current)
         map_revision_sections(revision_set, current, older_revision_sections)
         write_mapping(older_revision_sections, argv[1])

@@ -3,25 +3,18 @@ import re
 import json
 import difflib
 from urllib.error import URLError
-
 import chapter_mapping
 
 sys.path.append("../tools")
 from revision_PDF_to_txt import read_referenced_revision
 
-# (?:(?:^\d+\)(?:(?!^\d+\)).*\n)*)*(?:§ \d+(?:\.\d+)*) \d+$\s+c©ISO\/IEC N\d+)
-
 DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.7
 DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD = 0.55
 DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE = 0.05
 
-#SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
-
-#PARAGRAPH_PARSING_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
 PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?) ([\s\S]+?)(?=(?:^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
 
-# (^(\d+(?:\.\d+)* )|^—\((\d+(?:\.\d+)*)\) )([\s\S]+?)(?=(^—\((\d+(?:\.\d+)*)\) |^(\d+(?:\.\d+)* )|\Z))
-NEW_PAGE_REDUNDANT_CHARS = r"(?:(?:^\d+\)[\s\S]+?)?.*\s+c©ISO\/IEC N\d+)"
+#NEW_PAGE_REDUNDANT_CHARS = r"(?:(?:^\d+\)[\s\S]+?)?.*\s+c©ISO\/IEC N\d+)"
 
 PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
 
@@ -48,8 +41,7 @@ def load_txt_revisions(revision_set, port_num):
 def find_referenced_chapter_text(revision_text, referenced_chapter):
     referenced_chapter_regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_NUM_ID,
                                                              re.escape(referenced_chapter), 1)
-    referenced_chapter_text = re.findall(referenced_chapter_regex, revision_text,
-                                         re.M)  # TODO exclude chapter title from the match, reason: chapter id can be same as paragraph id especally in the first few chapters, could cause problems when matching paragraph
+    referenced_chapter_text = re.findall(referenced_chapter_regex, revision_text, re.M)
     return referenced_chapter_text
 
 
@@ -61,23 +53,20 @@ def find_referenced_paragraph_text(referenced_chapter_text, referenced_paragraph
     return referenced_paragraph_text
 
 
-def extract_paragraph_text(revision_text, referenced_section):
-    if referenced_section[0] == "7.6.1.8":
-        x = 0
+def extract_paragraph_from_referenced_revision(revision_text, referenced_section):
     referenced_chapter = referenced_section[0]
     referenced_paragraph = referenced_section[1]
 
     referenced_chapter_match = find_referenced_chapter_text(revision_text, referenced_chapter)
-
     if not referenced_chapter_match:
-        return (None, None)
+        return None, None
 
     referenced_chapter_bracket_id = referenced_chapter_match[0][1]
     referenced_chapter_text = referenced_chapter_match[0][2]
 
     referenced_paragraph_match = find_referenced_paragraph_text(referenced_chapter_text, referenced_paragraph)
     if not referenced_paragraph_match:
-        return (None, None)
+        return None, None
 
     return referenced_paragraph_match[0][0], referenced_chapter_bracket_id
 
@@ -113,7 +102,6 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
                 similar_paragraphs.append((chapter[0], paragraph, ratio1))
             # if ratio2 > 0.9:
                 # similar_paragraphs.append((c[0], paragraph, ratio2))
-        # TODO try to obtain the diff text in readable format and display the diff in annotation
 
     if similar_paragraphs:
         most_similar = find_most_similar_paragraph(similar_paragraphs)
@@ -128,7 +116,7 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
     #     return target_revision_find_paragraph_id(target_revision_chapters, paragraph_text,
     #                                              round(threshold - DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE, 2),
     #                                              referenced_revision_tag, referenced_section)
-
+    #
     # print("\tFailed to match referenced paragraph with minimum allowed match ratio (%s)\n\tReference: %s %s:%s" %
     #       (DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD, referenced_revision_tag, referenced_section[0],
     #        referenced_section[1]))
@@ -151,94 +139,105 @@ def target_revision_find_section_id(target_revision_text, referenced_paragraph_t
                                              referenced_section)
 
 
+def is_valid_section_format(referenced_section):
+    return referenced_section is not None and len(referenced_section) == 2
+
+
+def found_referenced_paragraph(referenced_paragraph_text, referenced_chapter_bracket_id):
+    return referenced_paragraph_text is not None and referenced_chapter_bracket_id is not None
+
+
 def process_reference_error(reference, ref_errors, msg):
     reference["error"] = msg
     ref_errors.append(reference)
 
 
-def process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag, ref_errors):
+def map_reference_same_revision(reference):
+    reference["similarity"] = 1.0
+    reference["error"] = ""
+
+
+def map_reference_different_revision(reference, revision_text_dict, target_revision_tag, referenced_paragraph_text,
+                                     referenced_chapter_bracket_id, referenced_revision_tag, referenced_section,
+                                     ref_errors):
+    target_revision_section_id = target_revision_find_section_id(revision_text_dict[target_revision_tag],
+                                                                 referenced_paragraph_text,
+                                                                 referenced_chapter_bracket_id,
+                                                                 referenced_revision_tag, referenced_section)
+    if target_revision_section_id:
+        reference["document"]["section"] = target_revision_section_id[0] + ":" + target_revision_section_id[1][0]
+        reference["similarity"] = target_revision_section_id[2]
+        reference["error"] = ""
+    else:
+        process_reference_error(reference, ref_errors, "Failed to locate referenced section in target"
+                                                       " revision (%s)" % target_revision_tag)
+
+
+def map_reference(reference, revision_text_dict, target_revision_tag, ref_errors):
+    referenced_revision_tag = reference["document"]["document"].lower()
+    referenced_section = re.split("[:/]", reference["document"]["section"])
+
+    if not is_valid_section_format(referenced_section):
+        process_reference_error(reference, ref_errors, "Unsupported section format")
+        return
+
+    referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_from_referenced_revision(
+        revision_text_dict[referenced_revision_tag], referenced_section)
+    if not found_referenced_paragraph(referenced_paragraph_text, referenced_chapter_bracket_id):
+        process_reference_error(reference, ref_errors, "Failed to locate referenced section in referenced"
+                                                       " revision (%s)" % referenced_revision_tag)
+        return
+
+    if referenced_revision_tag == target_revision_tag:
+        map_reference_same_revision(reference)
+    else:
+        map_reference_different_revision(reference, revision_text_dict, target_revision_tag, referenced_paragraph_text,
+                                         referenced_chapter_bracket_id, referenced_revision_tag, referenced_section,
+                                         ref_errors)
+
+
+def map_referenced_paragraphs(references, revision_text_dict, target_revision_tag, ref_errors):
     print("Mapping references to %s" % target_revision_tag)
-    target_text = revisions_text_dict[target_revision_tag]
-
     for reference in references:
-        referenced_revision_tag = reference["document"]["document"].lower()
-
-        if referenced_revision_tag == target_revision_tag:
-
-            referenced_section = re.split("[:/]", reference["document"]["section"])
-            if referenced_section is None or len(referenced_section) != 2:
-                process_reference_error(reference, ref_errors, "Unsupported section format")
-                continue
-
-            referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(
-                revisions_text_dict[referenced_revision_tag], referenced_section)
-            if referenced_paragraph_text is None:
-                process_reference_error(reference, ref_errors, "Failed to locate referenced section in referenced"
-                                                               " revision (%s)" % referenced_revision_tag)
-                continue
-
-            reference["similarity"] = 1.0
-            reference["error"] = ""
-        else:
-            referenced_section = re.split("[:/]", reference["document"]["section"])
-            if referenced_section is None or len(referenced_section) != 2:
-                process_reference_error(reference, ref_errors, "Unsupported section format")
-                continue
-
-            referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_text(
-                revisions_text_dict[referenced_revision_tag], referenced_section)
-            if referenced_paragraph_text is None:
-                process_reference_error(reference, ref_errors, "Failed to locate referenced section in referenced"
-                                                               " revision (%s)" % referenced_revision_tag)
-                continue
-
-            target_revision_section_id = target_revision_find_section_id(target_text,
-                                                                         referenced_paragraph_text,
-                                                                         referenced_chapter_bracket_id,
-                                                                         referenced_revision_tag, referenced_section)
-            if target_revision_section_id:
-                #most_similar[0] + ":" + most_similar[1][1], most_similar[2]
-                reference["document"]["section"] = target_revision_section_id[0] + ":" + target_revision_section_id[1][0]
-                reference["similarity"] = target_revision_section_id[2]
-                reference["error"] = ""
-            else:
-                process_reference_error(reference, ref_errors, "Failed to locate referenced section in target"
-                                                               " revision (%s)" % target_revision_tag)
+        map_reference(reference, revision_text_dict, target_revision_tag, ref_errors)
 
 
-def map_paragraphs_to_target_revision(target_revision_tag, port_num):
-    revision_set = set()
-    revision_set.add(target_revision_tag)
-
-    references = chapter_mapping.load_references()
-    chapter_mapping.extract_revision_tag_list_from_references(references, revision_set)
-
-    revisions_text_dict = load_txt_revisions(revision_set, port_num)
-
+def process_references(references, revision_text_dict, target_revision_tag):
     with open("referenceErrors.json", 'w') as ref_error_json:
         ref_errors = []
-        process_referenced_paragraphs(references, revisions_text_dict, target_revision_tag, ref_errors)
+        map_referenced_paragraphs(references, revision_text_dict, target_revision_tag, ref_errors)
         if ref_errors:
             print("Some references could not be mapped, for details, check referenceErrors.json")
             json.dump(ref_errors, ref_error_json, indent=4)
 
+
+def save_mapped_references(target_revision_tag, references):
     with open("references_mapped_%s.json" % target_revision_tag, "w") as mapped_references:
         print("Saving mapped references")
         json.dump(references, mapped_references, indent=4)
+
+
+def map_paragraphs_to_target_revision(target_revision_tag, port_num):
+    references = chapter_mapping.load_references()
+
+    revision_set = set()
+    revision_set.add(target_revision_tag)
+    chapter_mapping.find_referenced_revision_tags(references, revision_set)
+
+    revision_text_dict = load_txt_revisions(revision_set, port_num)
+
+    process_references(references, revision_text_dict, target_revision_tag)
+    save_mapped_references(target_revision_tag,references)
+
     return references
 
 
 def main(argv):
     try:
+        # TODO optional port num arg
         references = map_paragraphs_to_target_revision(sys.argv[1], sys.argv[2])  # TODO argparse lib, progressbar?
     except (IndexError, FileNotFoundError, URLError):
         print("Usage: \"paragraphMapping.py <tag> <port number>\"\ne.g. \"paragraphMapping.py n4296 9997\"")
-
-    # try:
-
-    # except (RuntimeError, IndexError, FileNotFoundError) as e:
-    #     print(e)
-    #     print("Usage: \"paragraphMapping.py <tag>\"\ne.g. \"paragraphMapping.py n4296\"")
 
 
 if __name__ == "__main__":
