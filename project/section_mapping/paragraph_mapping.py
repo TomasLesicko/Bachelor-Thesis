@@ -15,10 +15,10 @@ DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.7
 DIFFLIB_MATCHER_RATIO_MINIMUM_THRESHOLD = 0.55
 DIFFLIB_MATCHER_RATIO_DECREMENT_VALUE = 0.05
 
-SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
+#SECTIONS_LINE_REGEX = '([A-Z0-9](?:\d)*(?:\.\d+)*): (\S+) - (?:[^\n]+)\n'
 
 #PARAGRAPH_PARSING_REGEX = r"(^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
-PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?)([\s\S]+?)(?=(?:^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
+PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?) ([\s\S]+?)(?=(?:^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
 
 # (^(\d+(?:\.\d+)* )|^—\((\d+(?:\.\d+)*)\) )([\s\S]+?)(?=(^—\((\d+(?:\.\d+)*)\) |^(\d+(?:\.\d+)* )|\Z))
 NEW_PAGE_REDUNDANT_CHARS = r"(?:(?:^\d+\)[\s\S]+?)?.*\s+c©ISO\/IEC N\d+)"

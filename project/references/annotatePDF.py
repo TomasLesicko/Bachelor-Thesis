@@ -107,7 +107,7 @@ def find_referenced_paragraph_page(doc, page_number, toc_page_count, section, st
 
     page = doc[toc_page_count + page_number - 1]
     blocks = page.getTextBlocks(flags=fitz.TEXT_INHIBIT_SPACES)
-    regex = re.compile("^(?:—\n\()?" + section[1] + "\)?")
+    regex = re.compile("^(?:—\n\()?" + section[1] + "\)?\n")
 
     for block in blocks:
         if chapter_start:
@@ -175,11 +175,13 @@ def copy_target_pdf(tag):
 
     return fitz.open(renamed_tag)
 
+
 def main(argv):
     try:
         target_PDF = copy_target_pdf(argv[1].lower())
         annotate_document(target_PDF, argv[1].lower(), argv[2])
-    except (RuntimeError, IndexError):
+    except (RuntimeError, IndexError, FileNotFoundError) as e:
+        print(e)
         print("annotatePDF arguments required: \"<tag> <port number>\"\ne.g. \"n4296 9997\"")
 
 
