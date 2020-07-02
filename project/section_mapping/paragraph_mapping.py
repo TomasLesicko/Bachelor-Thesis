@@ -18,9 +18,9 @@ PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?) ([\s\S]+?)(?=(?:^—?
 
 PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
 
-CHAPTER_PARSING_REGEX = r"(^[A-Z0-9](?:\d)*(?:\.\d+)*) .+ \[(.+)\]$([\s\S]+?)(?=(?:^[A-Z0-9](?:\d)*(?:\.\d+)* .+ \[.+\]$)|\Z)"
+CHAPTER_PARSING_REGEX = r"^(?:Annex )?([A-Z0-9](?:\d)*(?:\.\d+)*)(?: (?:.+\n){0,3}?.*\[(\D\S+)\]$([\s\S]+?))(?=(?:^(?:Annex )?[A-Z0-9](?:\d)*(?:\.\d+)* (?:.+\n){0,3}?.*\[\D\S+\]$)|\Z)"
 CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
-CHAPTER_PARSING_REGEX_BRACKET_ID = r"(.+)"
+#CHAPTER_PARSING_REGEX_BRACKET_ID = r"(.+)"
 
 
 def load_txt_revisions(revision_set, port_num):
@@ -39,9 +39,7 @@ def load_txt_revisions(revision_set, port_num):
 
 
 def find_referenced_chapter_text(revision_text, referenced_chapter):
-    referenced_chapter_regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_NUM_ID,
-                                                             re.escape(referenced_chapter), 1)
-    referenced_chapter_text = re.findall(referenced_chapter_regex, revision_text, re.M)
+    referenced_chapter_text = revision_text[referenced_chapter]
     return referenced_chapter_text
 
 
@@ -53,16 +51,16 @@ def find_referenced_paragraph_text(referenced_chapter_text, referenced_paragraph
     return referenced_paragraph_text
 
 
-def extract_paragraph_from_referenced_revision(revision_text, referenced_section):
+def extract_paragraph_from_referenced_revision(revision_text_chapters, referenced_section):
     referenced_chapter = referenced_section[0]
     referenced_paragraph = referenced_section[1]
 
-    referenced_chapter_match = find_referenced_chapter_text(revision_text, referenced_chapter)
+    referenced_chapter_match = find_referenced_chapter_text(revision_text_chapters, referenced_chapter)
     if not referenced_chapter_match:
         return None, None
 
-    referenced_chapter_bracket_id = referenced_chapter_match[0][1]
-    referenced_chapter_text = referenced_chapter_match[0][2]
+    referenced_chapter_bracket_id = referenced_chapter_match[0]
+    referenced_chapter_text = referenced_chapter_match[1]
 
     referenced_paragraph_match = find_referenced_paragraph_text(referenced_chapter_text, referenced_paragraph)
     if not referenced_paragraph_match:
@@ -86,7 +84,7 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
                                       referenced_section):
     similar_paragraphs = []
     for chapter in target_revision_chapters:
-        target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, chapter[2], re.M)
+        target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, chapter[1], re.M)
         # TODO match paragraphs correctly if they're split by new page
         ratios = []
 
@@ -123,16 +121,17 @@ def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, 
     return ""
 
 
-def target_revision_find_section_id(target_revision_text, referenced_paragraph_text, referenced_chapter_id,
+def target_revision_find_section_id(target_revision_chapters, referenced_paragraph_text, referenced_chapter_id,
                                     referenced_revision_tag, referenced_section):
-    regex = CHAPTER_PARSING_REGEX.replace(CHAPTER_PARSING_REGEX_BRACKET_ID,
-                                          r"(" + re.escape(referenced_chapter_id) + r")", 1)
-
-    presumed_target_text_chapter = re.findall(regex, target_revision_text, re.M)
+    presumed_target_text_chapter = None
+    for chapter_id, chapter_contents in target_revision_chapters.items():
+        if chapter_contents[0] == referenced_chapter_id:
+            presumed_target_text_chapter = (chapter_id, chapter_contents[1])
+            break
     if presumed_target_text_chapter:
-        chapters = presumed_target_text_chapter
+        chapters = [presumed_target_text_chapter]
     else:
-        chapters = re.findall(CHAPTER_PARSING_REGEX, target_revision_text, re.M)
+        chapters = list(target_revision_chapters.values())
 
     return target_revision_find_paragraph_id(chapters, referenced_paragraph_text,
                                              DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD, referenced_revision_tag,
@@ -157,10 +156,10 @@ def map_reference_same_revision(reference):
     reference["error"] = ""
 
 
-def map_reference_different_revision(reference, revision_text_dict, target_revision_tag, referenced_paragraph_text,
+def map_reference_different_revision(reference, target_revision_chapters, target_revision_tag, referenced_paragraph_text,
                                      referenced_chapter_bracket_id, referenced_revision_tag, referenced_section,
                                      ref_errors):
-    target_revision_section_id = target_revision_find_section_id(revision_text_dict[target_revision_tag],
+    target_revision_section_id = target_revision_find_section_id(target_revision_chapters,
                                                                  referenced_paragraph_text,
                                                                  referenced_chapter_bracket_id,
                                                                  referenced_revision_tag, referenced_section)
@@ -173,7 +172,7 @@ def map_reference_different_revision(reference, revision_text_dict, target_revis
                                                        " revision (%s)" % target_revision_tag)
 
 
-def map_reference(reference, revision_text_dict, target_revision_tag, ref_errors):
+def map_reference(reference, revision_text_dict_chapters, target_revision_tag, ref_errors):
     referenced_revision_tag = reference["document"]["document"].lower()
     referenced_section = re.split("[:/]", reference["document"]["section"])
 
@@ -182,7 +181,7 @@ def map_reference(reference, revision_text_dict, target_revision_tag, ref_errors
         return
 
     referenced_paragraph_text, referenced_chapter_bracket_id = extract_paragraph_from_referenced_revision(
-        revision_text_dict[referenced_revision_tag], referenced_section)
+        revision_text_dict_chapters[referenced_revision_tag], referenced_section)
     if not found_referenced_paragraph(referenced_paragraph_text, referenced_chapter_bracket_id):
         process_reference_error(reference, ref_errors, "Failed to locate referenced section in referenced"
                                                        " revision (%s)" % referenced_revision_tag)
@@ -191,21 +190,35 @@ def map_reference(reference, revision_text_dict, target_revision_tag, ref_errors
     if referenced_revision_tag == target_revision_tag:
         map_reference_same_revision(reference)
     else:
-        map_reference_different_revision(reference, revision_text_dict, target_revision_tag, referenced_paragraph_text,
+        map_reference_different_revision(reference, revision_text_dict_chapters[target_revision_tag], target_revision_tag, referenced_paragraph_text,
                                          referenced_chapter_bracket_id, referenced_revision_tag, referenced_section,
                                          ref_errors)
 
 
-def map_referenced_paragraphs(references, revision_text_dict, target_revision_tag, ref_errors):
+def get_chapters(revision_text_dict):
+    print("Splitting revision texts into chapters")
+    revision_chapters_dict = {}
+    for revision_tag, revision_text in revision_text_dict.items():
+        referenced_chapters = re.findall(CHAPTER_PARSING_REGEX, revision_text, re.M)
+        chapter_dict = {}
+        for entry in referenced_chapters:
+            chapter_dict[entry[0]] = (entry[1], entry[2])
+        revision_chapters_dict[revision_tag] = chapter_dict
+
+    return revision_chapters_dict
+
+
+def map_referenced_paragraphs(references, revision_text_dict_chapters, target_revision_tag, ref_errors):
     print("Mapping references to %s" % target_revision_tag)
     for reference in references:
-        map_reference(reference, revision_text_dict, target_revision_tag, ref_errors)
+        map_reference(reference, revision_text_dict_chapters, target_revision_tag, ref_errors)
 
 
 def process_references(references, revision_text_dict, target_revision_tag):
     with open("referenceErrors.json", 'w') as ref_error_json:
         ref_errors = []
-        map_referenced_paragraphs(references, revision_text_dict, target_revision_tag, ref_errors)
+        revision_text_dict_chapters = get_chapters(revision_text_dict)
+        map_referenced_paragraphs(references, revision_text_dict_chapters, target_revision_tag, ref_errors)
         if ref_errors:
             print("Some references could not be mapped, for details, check referenceErrors.json")
             json.dump(ref_errors, ref_error_json, indent=4)

@@ -179,6 +179,7 @@ def copy_target_pdf(tag):
 def main(argv):
     try:
         target_PDF = copy_target_pdf(argv[1].lower())
+        x = target_PDF.getToC()
         annotate_document(target_PDF, argv[1].lower(), argv[2])
     except (RuntimeError, IndexError, FileNotFoundError) as e:
         print(e)
