@@ -17,7 +17,11 @@
     }
 
     function annotateSection(reference, section) {
-        document.getElementById(section).title = getAnnotation(reference);
+        if(document.getElementById(section).title) {
+            document.getElementById(section).title += "\n------------------" +
+                "----------\n";
+        }
+        document.getElementById(section).title += getAnnotation(reference);
     }
 
     function getHighlightColor(similarityRatio) {
