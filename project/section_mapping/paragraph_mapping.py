@@ -210,6 +210,61 @@ def map_reference(reference, revision_text_dict_chapters, target_revision_tag, r
                                          ref_errors)
 
 
+def get_chapters_rec(revision_text_dict):
+    new_dict = { k : v for k,v in revision_text_dict.items()} # dict size can't change during iter
+    for chapter_id, text in revision_text_dict.items():
+        new_dict[chapter_id] = {}
+        i = 1
+
+        # paragraphs belonging directly to this chapter
+        contents = r"(?:^" + str(chapter_id) + r" (?:.+\n){0,2}?.*\[[^\dN].*\]$)\n([\s\S]*?)(?=^" + str(chapter_id) + r"\.1|\Z)"
+        res = re.search(contents, text, re.M)
+        new_dict[chapter_id]["contents"] = res[1]
+        text = text[res.end():]
+
+        if text:
+            subchapter = chapter_id + r"\." + str(i)  # re.compile or something so . is matched literally
+            next = chapter_id + r"\." + str(i + 1)
+            r = r"^" + subchapter + r" (?:\n.+){0,2}?.*\[([^\dN].*)\]$([\s\S]+?)(?=^" + next + r" (?:\n.+){0,2}?.*\[[^\dN].+\]$|\Z)"
+            res = re.search(r, text, re.M)
+            x = 0
+            while res:
+                #print(chapter_id + " " + str(i))
+                new_dict[chapter_id][i] = res[0]
+                i += 1
+                text = text[res.end():]
+                subchapter = chapter_id + r"\." + str(i)
+                next = chapter_id + r"\." + str(i + 1)
+                r = r"^" + subchapter + r" (?:\n.+){0,2}?.*\[([^\dN].*)\]$([\s\S]+?)(?=^" + next + r" .*(?:\n.+){0,2}?.*\[[^\dN].+\]$|\Z)"
+                res = re.search(r, text, re.M)
+    revision_text_dict = new_dict
+
+
+def get_chapters_new(revision_text_dict):
+    print("Splitting revision texts into chapters")
+
+    for revision_tag, revision_text in revision_text_dict.items():
+        revision_text_dict[revision_tag] = {}
+        i = 1
+
+        r = r"^" + str(i) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$([\s\S]+?)(?=^" + str(i+1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
+        res = re.search(r, revision_text, re.M)
+        abc = res[0]
+        while res:
+            #print (revision_tag + " " + str(i))
+            revision_text_dict[revision_tag][str(i)] = res[0]
+            i += 1
+            revision_text = revision_text[res.end():]
+            r = r"^" + str(i) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$([\s\S]+?)(?=^" + str(
+                i + 1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
+            res = re.search(r, revision_text, re.M)
+        get_chapters_rec(revision_text_dict[revision_tag])
+
+    print("over")
+    while True:
+        x = 0
+
+
 def get_chapters(revision_text_dict):
     print("Splitting revision texts into chapters")
     revision_chapters_dict = {}
@@ -235,7 +290,7 @@ def map_referenced_paragraphs(references, revision_text_dict_chapters, target_re
 def process_references(references, revision_text_dict, target_revision_tag):
     with open("referenceErrors.json", 'w') as ref_error_json:
         ref_errors = []
-        revision_text_dict_chapters = get_chapters(revision_text_dict)
+        revision_text_dict_chapters = get_chapters_new(revision_text_dict)
         map_referenced_paragraphs(references, revision_text_dict_chapters, target_revision_tag, ref_errors)
         if ref_errors:
             print("Some references could not be mapped, for details, check referenceErrors.json")
