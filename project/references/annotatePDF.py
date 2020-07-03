@@ -64,9 +64,8 @@ def set_annot_contents(ref):
         annot_contents += "\nMarked as TODO"
         
     revision = ref["document"]["document"]
-    section = ref["document"]["section"]
     annot_contents += "\n" + str(round(100 * float(ref["similarity"]), 2)) + "% " +\
-                      "match with paragraph in referenced revision (%s %s)" % (revision, section)
+                      "match with paragraph in referenced revision (%s)" % revision
 
     return annot_contents
 

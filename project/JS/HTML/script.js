@@ -3,9 +3,6 @@
 
     const currentRevisionTag = "n4820";
 
-    const currentRevisionTagColor = "#009933";
-    const differentRevisionTagColor = "#66ff66";
-
     let chapterNameDict = JSON.parse(sessionStorage.getItem('dictionary'));
     let references = JSON.parse(sessionStorage.getItem('references'));
     let chapterMapping = JSON.parse(sessionStorage.getItem('mapping'));
@@ -14,31 +11,40 @@
     let faultyReferenceFormatCounter = 0;
 
 
-    function colorRelevantSections(revisionTag, sectionsToColor) {
-        sectionsToColor.forEach((section) =>
-            document.getElementById(section).style.backgroundColor =
-                getHighlightColor(revisionTag));
+    function colorSection(similarityRatio, section) {
+        document.getElementById(section).style.backgroundColor =
+                getHighlightColor(similarityRatio);
     }
 
-    function displaySemanticsComments(reference, commentedSections) {
-        commentedSections.forEach((section) =>
-            document.getElementById(section).title =
-                getReferenceComment(reference));
+    function annotateSection(reference, section) {
+        document.getElementById(section).title = getAnnotation(reference);
     }
 
-    function getHighlightColor(revisionTag) {
-        return (revisionTag === currentRevisionTag) ?
-            currentRevisionTagColor : differentRevisionTagColor;
+    function getHighlightColor(similarityRatio) {
+        let r, b;
+        r = b = "00";
+        let g = (Math.round(similarityRatio * 255)).toString(16);
+
+        return "#" + r + g + b;
+
     }
 
-    function getReferenceComment(reference) {
-        return reference.document.document + ", " +
-            reference.document.section + ", (current "
-            + currentRevisionTag + ")\n" + JSON.stringify(reference.semantics);
+    function getAnnotation(reference) {
+        let similarityPercentage = Math.round((10000*reference.similarity))/100;
+        let annot = reference.semantics.file;
+        if (reference.document.TODO === "true") {
+            annot += "\nMarked as TODO";
+        }
+
+        annot += "\n" + JSON.stringify(reference.semantics.lines) + "\n" +
+            (similarityPercentage).toString() +
+            "% match with paragraph in referenced revision ("
+            + reference.document.document + ")";
+
+        return annot;
     }
 
     function handleFaultyReferences() {
-        //TODO different alerts for different problems
         if (faultyReferenceFormatCounter > 0) {
             alert(faultyReferenceFormatCounter +
                 " faulty reference formats found.")
@@ -55,25 +61,22 @@
 
     function highlightRelevantSection(reference) {
         // supports 1.2:3 and 1.2/3
-        let chapterAndSections = reference.document.section.split(/[:\/]+/);
+        let section = reference.document.section.split(/[:\/]+/);
 
-        let currentRevisionChapter;
+        let chapter = section[0];
         let HTMLPageName;
 
-        if (!isValidReference(chapterAndSections)) {
+        if (!isValidReference(section)) {
             ++faultyReferenceFormatCounter;
             return;
         }
 
-        currentRevisionChapter = mapChapterToCurrentRevision(
-            reference.document.document, chapterAndSections[0]);
-        HTMLPageName = chapterNameDict[currentRevisionChapter]+".html";
+        HTMLPageName = chapterNameDict[chapter]+".html";
 
         if (HTMLPageName === thisHTMLPageName) {
-            let sections = chapterAndSections[1].split("-");
-
-            colorRelevantSections(reference.document.document, sections);
-            displaySemanticsComments(reference, sections);
+            let paragraph = section[1];
+            colorSection(reference.similarity, paragraph);
+            annotateSection(reference, paragraph);
         }
     }
 
@@ -85,6 +88,8 @@
         return chapterAndSection && chapterAndSection.length >= 2;
     }
 
+    // Chapters and paragraphs are now mapped by paragraph_mapping.py
+    // script.js already receives mapped references
     function mapChapterToCurrentRevision(revisionTag, chapter) {
         return (revisionTag === currentRevisionTag) ?
             chapter : chapterMapping[revisionTag.toLowerCase()][chapter];
