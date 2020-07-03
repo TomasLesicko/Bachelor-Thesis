@@ -44,6 +44,8 @@ def find_referenced_chapter_text(revision_text, referenced_chapter):
 
 
 def find_referenced_paragraph_text(referenced_chapter_text, referenced_paragraph):
+    # TODO return a dict of all paragraphs to access later, would be faster if multiple references
+    # reference a paragraph in this chapter
     referenced_paragraph_regex = PARAGRAPH_PARSING_REGEX.replace(PARAGRAPH_PARSING_REGEX_NUM_ID,
                                                                  re.escape(referenced_paragraph), 1)
     referenced_paragraph_text = re.findall(referenced_paragraph_regex, referenced_chapter_text, re.M)
@@ -82,8 +84,12 @@ def find_most_similar_paragraph(similar_paragraphs):
 
 def target_revision_find_paragraph_id(target_revision_chapters, paragraph_text, threshold, referenced_revision_tag,
                                       referenced_section):
+    if referenced_section[0] == "12.1" and referenced_section[1] == "4.8":
+        x = 0
     similar_paragraphs = []
     for chapter in target_revision_chapters:
+        if chapter[0] == "class.default.ctor":
+            x = 0
         target_chapter_paragraphs = re.findall(PARAGRAPH_PARSING_REGEX, chapter[1], re.M)
         # TODO match paragraphs correctly if they're split by new page
         ratios = []
@@ -125,13 +131,22 @@ def target_revision_find_section_id(target_revision_chapters, referenced_paragra
                                     referenced_revision_tag, referenced_section):
     presumed_target_text_chapter = None
     for chapter_id, chapter_contents in target_revision_chapters.items():
+        if chapter_id == "D.16":
+            x = 0
         if chapter_contents[0] == referenced_chapter_id:
             presumed_target_text_chapter = (chapter_id, chapter_contents[1])
             break
     if presumed_target_text_chapter:
         chapters = [presumed_target_text_chapter]
     else:
-        chapters = list(target_revision_chapters.values())
+        cc = referenced_chapter_id.split(".")
+        chapters = []
+        if len(cc) > 1: # no point in searching if it was already a full chapter
+            for chapter_id, chapter_contents in target_revision_chapters.items():
+                if chapter_contents[0].split(".")[0] == cc[0]:
+                    chapters.append((chapter_id, chapter_contents[1]))
+
+        print("Error new %s:%s" % (referenced_section[0], referenced_section[1]))
 
     return target_revision_find_paragraph_id(chapters, referenced_paragraph_text,
                                              DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD, referenced_revision_tag,
@@ -210,7 +225,10 @@ def get_chapters(revision_text_dict):
 
 def map_referenced_paragraphs(references, revision_text_dict_chapters, target_revision_tag, ref_errors):
     print("Mapping references to %s" % target_revision_tag)
+    i = 1
     for reference in references:
+        print("reference no.%s" % i)
+        i += 1
         map_reference(reference, revision_text_dict_chapters, target_revision_tag, ref_errors)
 
 
