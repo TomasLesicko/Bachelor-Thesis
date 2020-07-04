@@ -4,6 +4,7 @@ import json
 import difflib
 from urllib.error import URLError
 import chapter_mapping
+import time
 
 sys.path.append("../tools")
 from revision_PDF_to_txt import read_referenced_revision
@@ -210,59 +211,164 @@ def map_reference(reference, revision_text_dict_chapters, target_revision_tag, r
                                          ref_errors)
 
 
-def get_chapters_rec(revision_text_dict):
-    new_dict = { k : v for k,v in revision_text_dict.items()} # dict size can't change during iter
-    for chapter_id, text in revision_text_dict.items():
-        new_dict[chapter_id] = {}
-        i = 1
+def get_paragraphs_rec(revision_text_dict, parent_paragraph_id=""):
+    for paragraph_id, text in revision_text_dict.items():
+        if not paragraph_id == "contents":
+            revision_text_dict[paragraph_id] = {}
+            subparagraph_id = 1
 
-        # paragraphs belonging directly to this chapter
-        contents = r"(?:^" + str(chapter_id) + r" (?:.+\n){0,2}?.*\[[^\dN].*\]$)\n([\s\S]*?)(?=^" + str(chapter_id) + r"\.1|\Z)"
-        res = re.search(contents, text, re.M)
-        new_dict[chapter_id]["contents"] = res[1]
+            a = r""
+            b = r""
+            if parent_paragraph_id:
+                a += r"—\("
+                b += r"\)"
+            r = r"^" + a + parent_paragraph_id + str(paragraph_id) + b + r" [\s\S]+?(?=^—\(" + parent_paragraph_id \
+                + str(paragraph_id) + r"\.1\) |\Z)"
+            res = re.match(r, text, re.M)
+            xx = res[0]
+            revision_text_dict[paragraph_id]["contents"] = res[0]
+            text = text[res.end():]
+
+            if text:
+                subparagraph = paragraph_id + r"\." + str(subparagraph_id)
+                next = paragraph_id + r"\." + str(subparagraph_id + 1)
+
+                r = r"^—\(" + parent_paragraph_id + subparagraph + r"\) [\s\S]+?(?=^—\(" + parent_paragraph_id \
+                    + next + r"\) |\Z)"
+                res = re.match(r, text, re.M)
+
+                while res:
+                    revision_text_dict[paragraph_id][str(subparagraph_id)] = res[0]
+                    subparagraph_id += 1
+                    text = text[res.end():]
+                    subparagraph = paragraph_id + r"\." + str(subparagraph_id)
+                    next = paragraph_id + r"\." + str(subparagraph_id + 1)
+                    r = r"^—\(" + parent_paragraph_id + subparagraph + r"\) [\s\S]+?(?=^—\(" + parent_paragraph_id \
+                        + next + r"\) |\Z)"
+                    res = re.match(r, text, re.M)
+
+            get_paragraphs_rec(revision_text_dict[paragraph_id], parent_paragraph_id + paragraph_id + ".")
+
+
+def get_paragraphs(revision_text_dict, text):
+    paragraph_id = 1
+    # TODO paragraph alternative 1. 2. 3. etc like in 5.2:1 n4820
+    r = r"^[\s\S]*?(?=^1 |\Z)"
+    #r = r"^" + str(paragraph_id) + r" [\s\S]+?(?=^" + str(paragraph_id + 1) + r" |\Z)"
+    res = re.match(r, text, re.M) # search if doesn't work - need to implement maatching unmarked text I guess?
+    revision_text_dict["contents"] = res[0]
+    text = text[res.end():]
+
+    if res:
+        r = r"^" + str(paragraph_id) + r" [\s\S]+?(?=^" + str(paragraph_id + 1) + r" |\Z)"
+        res = re.match(r, text, re.M)
+    while res:
+        revision_text_dict[str(paragraph_id)] = res[0]
+        paragraph_id += 1
         text = text[res.end():]
 
-        if text:
-            subchapter = chapter_id + r"\." + str(i)  # re.compile or something so . is matched literally
-            next = chapter_id + r"\." + str(i + 1)
-            r = r"^" + subchapter + r" (?:\n.+){0,2}?.*\[([^\dN].*)\]$([\s\S]+?)(?=^" + next + r" (?:\n.+){0,2}?.*\[[^\dN].+\]$|\Z)"
-            res = re.search(r, text, re.M)
+        r = r"^" + str(paragraph_id) + r" [\s\S]+?(?=^" + str(paragraph_id + 1) + r" |\Z)"
+        res = re.match(r, text, re.M)
+
+    if revision_text_dict:
+        get_paragraphs_rec(revision_text_dict)
+
+
+def get_chapters_rec(revision_text_dict, parent_chapter_id=""):
+    # new_dict = { k : v for k,v in revision_text_dict.items()} # dict size can't change during iter
+    for chapter_id, text in revision_text_dict.items():
+        if chapter_id == "4" and parent_chapter_id == "5.":
             x = 0
-            while res:
-                #print(chapter_id + " " + str(i))
-                new_dict[chapter_id][i] = res[0]
-                i += 1
-                text = text[res.end():]
-                subchapter = chapter_id + r"\." + str(i)
-                next = chapter_id + r"\." + str(i + 1)
-                r = r"^" + subchapter + r" (?:\n.+){0,2}?.*\[([^\dN].*)\]$([\s\S]+?)(?=^" + next + r" .*(?:\n.+){0,2}?.*\[[^\dN].+\]$|\Z)"
-                res = re.search(r, text, re.M)
-    revision_text_dict = new_dict
+        revision_text_dict[chapter_id] = {}
+        subchapter_id = 1
+
+        if not chapter_id == "contents":
+            # paragraphs belonging directly to this chapter
+            contents = r"(?:^" + parent_chapter_id + str(
+                chapter_id) + r" (?:.+\n){0,2}?.*?\[[^\dN].*?\]$)\n+([\s\S]*?)(?=^" + parent_chapter_id + str(
+                chapter_id) + r"\.1 (?:.+\n){0,2}?.*?\[[^\dN].*?\]$|\Z)"
+            res = re.match(contents, text, re.M)
+            # res = re.search(bytes(contents, encoding='utf_8'), text, re.M)
+            if not res:
+                abc = 0
+            xx = res[1]
+            revision_text_dict[chapter_id]["contents"] = res[1] # just place the func here?
+            text = text[res.end():]
+
+            if text:
+                subchapter = chapter_id + r"\." + str(
+                    subchapter_id)  # re.compile or something so . is matched literally
+                next = chapter_id + r"\." + str(subchapter_id + 1)
+                r = r"^" + parent_chapter_id + subchapter + r" (?:\n.+){0,2}?.*?\[([^\dN].*?)\]$([\s\S]+?)(?=^" + parent_chapter_id + next + r" (?:\n.+){0,2}?.*?\[[^\dN].*?\]$|\Z)"
+                res = re.match(r, text, re.M)
+                # res = re.search(bytes(r, encoding='utf_8'), text, re.M)
+
+                while res:
+                    # print(chapter_id + " " + str(i))
+                    revision_text_dict[chapter_id][str(subchapter_id)] = res[0]
+                    subchapter_id += 1
+                    text = text[res.end():]
+                    subchapter = chapter_id + r"\." + str(subchapter_id)
+                    next = chapter_id + r"\." + str(subchapter_id + 1)
+                    r = r"^" + parent_chapter_id + subchapter + r" (?:\n.+){0,2}?.*?\[([^\dN].*?)\]$([\s\S]+?)(?=^" + parent_chapter_id + next + r" .*(?:\n.+){0,2}?.*?\[[^\dN].*?\]$|\Z)"
+                    res = re.match(r, text, re.M)
+                    # res = re.search(bytes(r, encoding='utf_8'), text, re.M)
+
+            get_chapters_rec(revision_text_dict[chapter_id], parent_chapter_id+chapter_id+".")
+        elif text:
+            get_paragraphs(revision_text_dict[chapter_id], text)
+    #revision_text_dict = new_dict
 
 
-def get_chapters_new(revision_text_dict):
+def get_chapters_new(revision_text_dict, references):
     print("Splitting revision texts into chapters")
-
+    #start_time = time.time()
     for revision_tag, revision_text in revision_text_dict.items():
+        print("parsing %s" % revision_tag)
         revision_text_dict[revision_tag] = {}
+        #v = memoryview(revision_text.encode('utf_8')) # open files in byte mode
+        # vv = "".join(map(chr, v)) # fast byte to string
         i = 1
 
-        r = r"^" + str(i) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$([\s\S]+?)(?=^" + str(i+1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
+        r = r"^" + str(i) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$\n+([\s\S]+?)(?=^" + str(i+1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
         res = re.search(r, revision_text, re.M)
-        abc = res[0]
+        #res = re.search(bytes(r, encoding='utf_8'), v.tobytes(), re.M)
+
         while res:
             #print (revision_tag + " " + str(i))
             revision_text_dict[revision_tag][str(i)] = res[0]
             i += 1
+
             revision_text = revision_text[res.end():]
+            #v = v[res.end():]
             r = r"^" + str(i) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$([\s\S]+?)(?=^" + str(
                 i + 1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
-            res = re.search(r, revision_text, re.M)
+            res = re.match(r, revision_text, re.M) # shouldn't need ^ at start with match
+            #res = re.search(bytes(r, encoding='utf_8'), v.tobytes(), re.M)
         get_chapters_rec(revision_text_dict[revision_tag])
 
-    print("over")
-    while True:
-        x = 0
+    with open("refDictTest.json", "x") as test:
+        json.dump(revision_text_dict, test, indent=4)
+    return ""
+
+
+def find_chapter(subchapters, revision_text_dict):
+    d = revision_text_dict
+    for sc in subchapters:
+        d = d[sc]
+    return d
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def get_chapters(revision_text_dict):
@@ -290,7 +396,18 @@ def map_referenced_paragraphs(references, revision_text_dict_chapters, target_re
 def process_references(references, revision_text_dict, target_revision_tag):
     with open("referenceErrors.json", 'w') as ref_error_json:
         ref_errors = []
-        revision_text_dict_chapters = get_chapters_new(revision_text_dict)
+
+        start_time = time.time()
+        try:
+            with open("refDictTest.json", "r") as test:
+                x = json.loads(test.read())
+                print("----%s s----" % (time.time() - start_time))
+                return
+        except FileNotFoundError:
+            revision_text_dict_chapters = get_chapters_new(revision_text_dict, references)
+            print("----%s s----" % (time.time() - start_time))
+            return
+
         map_referenced_paragraphs(references, revision_text_dict_chapters, target_revision_tag, ref_errors)
         if ref_errors:
             print("Some references could not be mapped, for details, check referenceErrors.json")
@@ -313,7 +430,7 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
     revision_text_dict = load_txt_revisions(revision_set, port_num)
 
     process_references(references, revision_text_dict, target_revision_tag)
-    save_mapped_references(target_revision_tag,references)
+    save_mapped_references(target_revision_tag, references)
 
     return references
 
