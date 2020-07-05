@@ -75,14 +75,19 @@ def is_valid_revision(name):
     return re.search(valid, name.lower())
 
 
-def map_sections(tag, references=None):
+def map_sections(tag, references=None, revision_set_e=None):
     revision_set = set()
+    if revision_set_e:
+        revision_set = revision_set_e
+
     current = {}
     older_revision_sections = {}
+
     if not references:
         references = load_references()
 
-    find_referenced_revision_tags(references, revision_set)
+    if not revision_set:
+        find_referenced_revision_tags(references, revision_set)
     read_target_revision_sections(tag, current)
     map_revision_sections(revision_set, current, older_revision_sections)
     write_mapping(older_revision_sections, tag)

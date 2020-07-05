@@ -146,17 +146,22 @@ def process_reference(doc, ref):
 
 
 def annotate_document(doc, target_pdf_tag, port_num):
-    try:
-        with open("references_mapped_%s.json" % target_pdf_tag, "r") as r:
-            references = json.loads(r.read())
-    except FileNotFoundError:
-        print("references_mapped_%s.json" % target_pdf_tag + " not found, attempting to map references")
-        references = paragraph_mapping.map_paragraphs_to_target_revision(target_pdf_tag, port_num)
-    finally:
-        if references:
-            print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
-            for ref in references:
-                process_reference(doc, ref)
+    # try:
+    #     with open("references_mapped_%s.json" % target_pdf_tag, "r") as r:
+    #         references = json.loads(r.read())
+    # except FileNotFoundError:
+    #     print("references_mapped_%s.json" % target_pdf_tag + " not found, attempting to map references")
+    #     references = paragraph_mapping.map_paragraphs_to_target_revision(target_pdf_tag, port_num)
+    # finally:
+    #     if references:
+    #         print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
+    #         for ref in references:
+    #             process_reference(doc, ref)
+
+    references = paragraph_mapping.map_paragraphs_to_target_revision(target_pdf_tag, port_num)
+    print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
+    for ref in references:
+        process_reference(doc, ref)
 
     print("Saving document...")
     doc.saveIncr() # editing a copied PDF is much faster than saving a new PDF

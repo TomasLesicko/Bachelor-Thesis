@@ -18,7 +18,7 @@ def extract_relevant_revision_sections(revision_tags):
         os.chdir("source")
 
         try:
-            subprocess.run("./a.out std.tex > %s%s.txt" % (SECTION_FILE_SHARED_NAME, tag), shell=True, check=True)
+            subprocess.run("./sections.out std.tex > %s%s.txt" % (SECTION_FILE_SHARED_NAME, tag), shell=True, check=True)
 
         except subprocess.CalledProcessError as cpe:
             print("sections.cpp has to be compiled in draft/source\n"
