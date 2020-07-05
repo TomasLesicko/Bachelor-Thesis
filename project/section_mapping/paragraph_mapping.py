@@ -33,7 +33,8 @@ def load_txt_revisions(revision_set, port_num):
             try:
                 revisions_text_dict[revision_tag] = read_referenced_revision(revision_tag, port_num)
             except:
-                print("[Error] Missing %s.txt, make sure tika server is running with correct port number" % revision_tag)
+                print(
+                    "[Error] Missing %s.txt, make sure tika server is running with correct port number" % revision_tag)
 
     return revisions_text_dict
 
@@ -88,7 +89,6 @@ def target_revision_find_paragraph_id(target_revision_paragraphs, referenced_par
                                       referenced_revision_tag,
                                       referenced_section, target_section):
     similar_paragraphs = []
-    # TODO match paragraphs correctly if they're split by new page
     ratios = []
 
     paragraphs = {}
@@ -111,16 +111,45 @@ def target_revision_find_paragraph_id(target_revision_paragraphs, referenced_par
         most_similar = find_most_similar_paragraph(similar_paragraphs)
         return most_similar
 
-    return ""
+    return None
+
+
+def is_in_mapping_cache(referenced_revision_tag, referenced_section, mapping_cache):
+    s = ":".join(referenced_section) ## a.b/c ?
+    if referenced_revision_tag in mapping_cache and s in mapping_cache[referenced_revision_tag]:
+        return mapping_cache[referenced_revision_tag][s]
+
+    return None
+
+
+def calculate_cached_text_similarity(cache, target_revision_chapters, referenced_paragraph_text):
+    target_section = cache.split(":")
+    chapters = find_target_chapter(target_revision_chapters, target_section[0].split("."))
+    target_paragraph_text = find_target_chapter(chapters, target_section[1].split("."))
+    matcher = difflib.SequenceMatcher(None, referenced_paragraph_text, target_paragraph_text,
+                                      autojunk=False)
+    ratio1 = matcher.ratio()
+    return target_section[0], (target_section[1], target_paragraph_text, ratio1)
 
 
 def map_paragraph_to_target_revision(target_revision_chapters, referenced_paragraph_text,
-                                     referenced_revision_tag, referenced_section, section_mapping):
-    target_section = section_mapping[referenced_revision_tag][referenced_section[0]]  # try redo if not found, it's possible it doesn't include the revision
+                                     referenced_revision_tag, referenced_section, section_mapping, mapping_cache):
+    cache = is_in_mapping_cache(referenced_revision_tag, referenced_section, mapping_cache)
+    if cache:
+        print("cached")
+        return calculate_cached_text_similarity(cache, target_revision_chapters, referenced_paragraph_text)
+
+    if referenced_revision_tag in section_mapping and referenced_section[0] in section_mapping[referenced_revision_tag]:
+        target_section = section_mapping[referenced_revision_tag][referenced_section[0]]
+    else:
+        print("Could not find %s %s in section mapping, make sure it's up to date" %
+              (referenced_revision_tag, referenced_section[0]))
+        target_section = None
 
     if target_section:
         target_chapter = find_target_chapter(target_revision_chapters, target_section.split("."))
         if target_chapter:
+            print("not cached")
             return target_section, target_revision_find_paragraph_id(target_chapter, referenced_paragraph_text,
                                                                      DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD,
                                                                      referenced_revision_tag,
@@ -147,25 +176,37 @@ def map_reference_same_revision(reference):
     reference["error"] = ""
 
 
+def save_to_cache(reference_revision_tag, referenced_section, target_section, mapping_cache):
+    if reference_revision_tag in mapping_cache:
+        mapping_cache[reference_revision_tag][referenced_section] = target_section
+    else:
+        mapping_cache[reference_revision_tag] = {}
+        mapping_cache[reference_revision_tag][referenced_section] = target_section
+
+
 def map_reference_different_revision(reference, target_revision_chapters, target_revision_tag,
                                      referenced_paragraph_text,
                                      referenced_revision_tag, referenced_section,
-                                     ref_errors, section_mapping):
+                                     ref_errors, section_mapping, mapping_cache):
     target_chapter_id, mapped_reference_results = map_paragraph_to_target_revision(target_revision_chapters,
                                                                                    referenced_paragraph_text,
                                                                                    referenced_revision_tag,
                                                                                    referenced_section,
-                                                                                   section_mapping)
+                                                                                   section_mapping, mapping_cache)
     if mapped_reference_results:
-        reference["document"]["section"] = target_chapter_id + ":" + mapped_reference_results[0]
+        section = target_chapter_id + ":" + mapped_reference_results[0]
+        reference["document"]["section"] = section
         reference["similarity"] = mapped_reference_results[2]
         reference["error"] = ""
+        save_to_cache(referenced_revision_tag, ":".join(referenced_section), section, mapping_cache)
     else:
+        print("erronous")
         process_reference_error(reference, ref_errors, "Failed to locate referenced section in target"
                                                        " revision (%s)" % target_revision_tag)
 
 
-def map_reference(reference, revision_text_dict_chapters, target_revision_tag, ref_errors, section_mapping):
+def map_reference(reference, revision_text_dict_chapters, target_revision_tag, ref_errors, section_mapping,
+                  mapping_cache):
     referenced_revision_tag = reference["document"]["document"].lower()
     referenced_section = re.split("[:/]", reference["document"]["section"])
 
@@ -181,12 +222,13 @@ def map_reference(reference, revision_text_dict_chapters, target_revision_tag, r
         return
 
     if referenced_revision_tag == target_revision_tag:
+        print("same rev")
         map_reference_same_revision(reference)
     else:
         map_reference_different_revision(reference, revision_text_dict_chapters[target_revision_tag],
                                          target_revision_tag, referenced_paragraph_text,
                                          referenced_revision_tag, referenced_section,
-                                         ref_errors, section_mapping)
+                                         ref_errors, section_mapping, mapping_cache)
 
 
 def get_paragraphs_rec(revision_text_dict, parent_paragraph_id=""):
@@ -322,19 +364,11 @@ def get_chapters(revision_text_dict):
     return revision_chapters_dict
 
 
-def map_referenced_paragraphs(references, revision_dict, target_revision_tag, ref_errors, allow_recursion=True):
+def map_referenced_paragraphs(references, revision_dict, target_revision_tag, ref_errors, section_mapping,
+                              mapping_cache):
     print("Mapping references to %s" % target_revision_tag)
-    try:
-        x = os.getcwd()
-        with open("../section_mapping/section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
-            section_mapping = json.load(section_mapping_file)
-            for reference in references:
-                map_reference(reference, revision_dict, target_revision_tag, ref_errors, section_mapping)
-    except FileNotFoundError:
-        print("Couldn't find section mapping to %s, attempting to create it" % target_revision_tag)
-        map_sections(target_revision_tag, references)
-        if allow_recursion:
-            map_referenced_paragraphs(references, revision_dict, target_revision_tag, ref_errors, False)
+    for reference in references:
+        map_reference(reference, revision_dict, target_revision_tag, ref_errors, section_mapping, mapping_cache)
 
 
 def load_revision_dict(revision_text_dict):
@@ -347,19 +381,55 @@ def load_revision_dict(revision_text_dict):
     return revision_dict_chapters
 
 
-def process_references(references, revision_dict, target_revision_tag):
-    with open("referenceErrors.json", 'w') as ref_error_json:
-        ref_errors = []
-        map_referenced_paragraphs(references, revision_dict, target_revision_tag, ref_errors)
+def write_errors(ref_errors):
+    with open("referenceErrors.json", "w") as ref_error_json:
         if ref_errors:
             print("Some references could not be mapped, for details, check referenceErrors.json")
             json.dump(ref_errors, ref_error_json, indent=4)
+
+
+def write_cache(mapping_cache, target_revision_tag):
+    with open("mapping_cache_%s.json" % target_revision_tag, "w") as cache:
+        if mapping_cache:
+            json.dump(mapping_cache, cache, indent=4)
+
+
+def process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache):
+    ref_errors = []
+    map_referenced_paragraphs(references, revision_dict, target_revision_tag, ref_errors, section_mapping,
+                              mapping_cache)
+    write_errors(ref_errors)
+    write_cache(mapping_cache, target_revision_tag)
 
 
 def save_mapped_references(target_revision_tag, references):
     with open("references_mapped_%s.json" % target_revision_tag, "w") as mapped_references:
         print("Saving mapped references")
         json.dump(references, mapped_references, indent=4)
+
+
+def load_section_mapping(target_revision_tag, references):
+    try:
+        with open("section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
+            section_mapping = json.load(section_mapping_file)
+    except FileNotFoundError:
+        print("Couldn't find section mapping to %s, attempting to create it" % target_revision_tag)
+        map_sections(target_revision_tag, references)
+        try:
+            with open("section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
+                section_mapping = json.load(section_mapping_file)
+        except FileNotFoundError:
+            print("Failed to create section mapping to %s" % target_revision_tag)
+            raise
+    return section_mapping
+
+
+def load_mapping_cache(target_revision_tag):
+    try:
+        with open("mapping_cache_%s.json" % target_revision_tag, "r") as cache:
+            return json.loads(cache.read())
+    except FileNotFoundError:
+        return {}
 
 
 def map_paragraphs_to_target_revision(target_revision_tag, port_num):
@@ -369,12 +439,17 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
     revision_set.add(target_revision_tag)
     chapter_mapping.find_referenced_revision_tags(references, revision_set)
 
+    section_mapping = load_section_mapping(target_revision_tag, references)
     map_sections(target_revision_tag, references)
     revision_text_dict = load_txt_revisions(revision_set, port_num)
-    if len(revision_text_dict) == len(revision_set): # all revisions loaded correctly
+    if len(revision_text_dict) == len(revision_set):  # all revisions loaded correctly
+        mapping_cache = load_mapping_cache(target_revision_tag)
         revision_dict = load_revision_dict(revision_text_dict)
 
-        process_references(references, revision_dict, target_revision_tag)
+        if len(revision_dict) != len(revision_set):
+            revision_dict = split_revisions_into_chapters(revision_text_dict)
+
+        process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache)
         save_mapped_references(target_revision_tag, references)
 
         return references
