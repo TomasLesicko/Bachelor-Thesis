@@ -54,8 +54,6 @@ def highlight_section(page, rect, ref):
         annot.setColors(stroke=(color_intensity, color_intensity, 0))
     else:
         annot.setColors(stroke=(0, color_intensity, 0))
-    # even better, create a threshold like 0.8 where it's green, 0.6 yellow, 0.4 orange
-    # and a way to force the reference to be greeen once manually checked
 
 
 def set_annot_contents(ref):
@@ -182,7 +180,6 @@ def copy_target_pdf(tag):
 def main(argv):
     try:
         target_PDF = copy_target_pdf(argv[1].lower())
-        x = target_PDF.getToC()
         annotate_document(target_PDF, argv[1].lower(), argv[2])
     except (RuntimeError, IndexError, FileNotFoundError) as e:
         print(e)

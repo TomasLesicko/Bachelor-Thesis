@@ -1,6 +1,7 @@
 #!/bin/bash
 if [ -e references.json ]
 then
+    python3.6 ../section_mapping/chapter_mapping.py "$1"
     python3.6 annotatePDF.py "$@"
 else
     echo Could not find references.json, attempting to extract references from semantics
