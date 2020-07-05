@@ -5,8 +5,6 @@ import json
 import re
 import sys
 
-sys.path.append("../section_mapping")
-#import paragraph_mapping
 import paragraph_mapping
 
 from shutil import copy2
@@ -155,12 +153,12 @@ def annotate_document(doc, target_pdf_tag, port_num):
         print("references_mapped_%s.json" % target_pdf_tag + " not found, attempting to map references")
         references = paragraph_mapping.map_paragraphs_to_target_revision(target_pdf_tag, port_num)
     finally:
-        print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
-        for ref in references:
-            process_reference(doc, ref)
+        if references:
+            print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
+            for ref in references:
+                process_reference(doc, ref)
 
     print("Saving document...")
-    #doc.save("%s_annotated.pdf" % target_pdf_tag, garbage=4, deflate=True, clean=True)
     doc.saveIncr() # editing a copied PDF is much faster than saving a new PDF
 
 
@@ -180,7 +178,11 @@ def copy_target_pdf(tag):
 def main(argv):
     try:
         target_PDF = copy_target_pdf(argv[1].lower())
-        annotate_document(target_PDF, argv[1].lower(), argv[2])
+        if len(argv) > 2:
+            port_num = argv[2]
+        else:
+            port_num = None
+        annotate_document(target_PDF, argv[1].lower(), port_num)
     except (RuntimeError, IndexError, FileNotFoundError) as e:
         print(e)
         print("annotatePDF arguments required: \"<tag> <port number>\"\ne.g. \"n4296 9997\"")

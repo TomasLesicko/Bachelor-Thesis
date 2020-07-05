@@ -9,7 +9,7 @@ import os
 
 from chapter_mapping import map_sections
 
-from revision_PDF_to_txt import read_referenced_revision
+from tools.revision_PDF_to_txt import read_referenced_revision
 
 DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.7
 
@@ -30,7 +30,10 @@ def load_txt_revisions(revision_set, port_num):
             print("\tLoading %s" % revision_tag)
             revisions_text_dict[revision_tag] = txt_revision.read()
         except FileNotFoundError:
-            revisions_text_dict[revision_tag] = read_referenced_revision(revision_tag, port_num)
+            try:
+                revisions_text_dict[revision_tag] = read_referenced_revision(revision_tag, port_num)
+            except:
+                print("[Error] Missing %s.txt, make sure tika server is running with correct port number" % revision_tag)
 
     return revisions_text_dict
 
@@ -368,18 +371,24 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
 
     map_sections(target_revision_tag, references)
     revision_text_dict = load_txt_revisions(revision_set, port_num)
-    revision_dict = load_revision_dict(revision_text_dict)
+    if len(revision_text_dict) == len(revision_set): # all revisions loaded correctly
+        revision_dict = load_revision_dict(revision_text_dict)
 
-    process_references(references, revision_dict, target_revision_tag)
-    save_mapped_references(target_revision_tag, references)
+        process_references(references, revision_dict, target_revision_tag)
+        save_mapped_references(target_revision_tag, references)
 
-    return references
+        return references
+
+    return None
 
 
 def main(argv):
     try:
-        # TODO optional port num arg
-        references = map_paragraphs_to_target_revision(sys.argv[1], sys.argv[2])
+        if len(sys.argv) > 2:
+            port_num = argv[2]
+        else:
+            port_num = None
+        references = map_paragraphs_to_target_revision(sys.argv[1], port_num)
     except (IndexError, FileNotFoundError, URLError):
         print("Usage: \"paragraphMapping.py <tag> <port number>\"\ne.g. \"paragraphMapping.py n4296 9997\"")
 

@@ -31,7 +31,7 @@ def read_referenced_revisions(revision_set, port_num):
 
 
 def read_referenced_revision(revision_tag, port_num):
-    path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'draft/papers/',
+    path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'draft/papers/',
                         revision_tag.lower() + ".pdf")
     print("\tLoading %s" % revision_tag)
     try:
