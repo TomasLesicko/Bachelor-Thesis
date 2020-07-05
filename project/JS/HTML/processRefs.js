@@ -38,7 +38,7 @@
 
         if(sessionStorage.getItem("dictionary") === null){
             jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
-                "Bachelor-Thesis/master/project/references/section_names_" +
+                "Bachelor-Thesis/master/project/JS/section_names_" +
                 "n4820.txt",
                 function(data) {
                     sessionStorage.setItem("dictionary",
@@ -48,7 +48,7 @@
 
         if(sessionStorage.getItem("mapping") === null){
             jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
-                "Bachelor-Thesis/master/project/section_mapping/" +
+                "Bachelor-Thesis/master/project/JS/" +
                 "section_mapping_to_n4820.json",
                 function(data) {
                     sessionStorage.setItem("mapping", data);
