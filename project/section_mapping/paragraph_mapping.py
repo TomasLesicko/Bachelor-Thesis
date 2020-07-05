@@ -5,7 +5,6 @@ import difflib
 from urllib.error import URLError
 import chapter_mapping
 import time
-import os
 
 from chapter_mapping import map_sections
 
@@ -385,7 +384,7 @@ def write_errors(ref_errors):
 
 
 def write_cache(mapping_cache, target_revision_tag):
-    with open("mapping_cache_%s.json" % target_revision_tag, "w") as cache:
+    with open("cache/mapping_cache_%s.json" % target_revision_tag, "w") as cache:
         if mapping_cache:
             json.dump(mapping_cache, cache, indent=4)
 
@@ -422,7 +421,7 @@ def load_section_mapping(target_revision_tag, references):
 
 def load_mapping_cache(target_revision_tag):
     try:
-        with open("mapping_cache_%s.json" % target_revision_tag, "r") as cache:
+        with open("cache/mapping_cache_%s.json" % target_revision_tag, "r") as cache:
             return json.loads(cache.read())
     except FileNotFoundError:
         return {}

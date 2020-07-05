@@ -130,41 +130,33 @@ def find_toc_page_count(doc):
     raise IndexError
 
 
-def process_reference(doc, ref):
+def process_reference(doc, ref, toc_page_count):
     if not ref["error"]:
         section = re.split("[:/]", ref["document"]["section"])
-        toc_page_count = find_toc_page_count(doc)
+
         page_number = find_referenced_section_page_number(doc, section, toc_page_count)
+        page_rect = find_referenced_paragraph_page(doc, page_number, toc_page_count, section, 0, False)
 
-        pageRect = find_referenced_paragraph_page(doc, page_number, toc_page_count, section, 0, False)
-
-        if pageRect[0] is not None and pageRect[1] is not None:
-            highlight_section(pageRect[0], pageRect[1], ref)
-            annotate_section(pageRect[0], pageRect[1], ref)
+        if page_rect[0] is not None and page_rect[1] is not None:
+            highlight_section(page_rect[0], page_rect[1], ref)
+            annotate_section(page_rect[0], page_rect[1], ref)
         else:
             x = 0 # handle faulty stuff somehow
 
 
 def annotate_document(doc, target_pdf_tag, port_num):
-    # try:
-    #     with open("references_mapped_%s.json" % target_pdf_tag, "r") as r:
-    #         references = json.loads(r.read())
-    # except FileNotFoundError:
-    #     print("references_mapped_%s.json" % target_pdf_tag + " not found, attempting to map references")
-    #     references = paragraph_mapping.map_paragraphs_to_target_revision(target_pdf_tag, port_num)
-    # finally:
-    #     if references:
-    #         print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
-    #         for ref in references:
-    #             process_reference(doc, ref)
-
     references = paragraph_mapping.map_paragraphs_to_target_revision(target_pdf_tag, port_num)
-    print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
-    for ref in references:
-        process_reference(doc, ref)
 
-    print("Saving document...")
-    doc.saveIncr() # editing a copied PDF is much faster than saving a new PDF
+    if references:
+        print("Highlighting and annotating references in %s.pdf" % target_pdf_tag)
+        toc_page_count = find_toc_page_count(doc)
+        for ref in references:
+            process_reference(doc, ref, toc_page_count)
+
+        print("Saving document...")
+        doc.saveIncr() # editing a copied PDF is much faster than saving a new PDF
+    else:
+        print("Failed to load references")
 
 
 def copy_target_pdf(tag):
