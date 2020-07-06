@@ -18,6 +18,8 @@ PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
 CHAPTER_PARSING_REGEX = r"^(?:Annex )?([A-Z0-9](?:\d)*(?:\.\d+)*)(?: (?:.+\n){0,3}?.*\[(\D\S+)\]$([\s\S]+?))(?=(?:^(?:Annex )?[A-Z0-9](?:\d)*(?:\.\d+)* (?:.+\n){0,3}?.*\[\D\S+\]$)|\Z)"
 CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
 
+PAGE_SPLIT_REGEX = r"(?:^(?:\d{1,3}\)[\s\S]+?)?§ [\d\.]+ \d{1,4}\s+[c©]{1,2}\s*ISO\/IEC N\d{1,4}\s+)?"
+
 
 def load_txt_revisions(revision_set, port_num):
     revisions_text_dict = {}
@@ -226,45 +228,55 @@ def map_reference(reference, revision_text_dict_chapters, target_revision_tag, r
                                          ref_errors, section_mapping, mapping_cache)
 
 
-def get_paragraphs_rec(revision_text_dict, parent_paragraph_id=""):
+def set_regex_parentheses(parent_paragraph_id):
+    par_open = r""
+    par_close = r""
+    if parent_paragraph_id:
+        par_open += r"—\("
+        par_close += r"\)"
+
+    return par_open, par_close
+
+
+def parse_subparagraph_contents(parent_paragraph_id, paragraph_id, subparagraph_id, text):
+    subparagraph = parent_paragraph_id + paragraph_id + r"\." + str(subparagraph_id)
+    next_subparagraph = parent_paragraph_id + paragraph_id + r"\." + str(subparagraph_id + 1)
+    r = r"(^—\(" + subparagraph + r"\) [\s\S]+?)" + PAGE_SPLIT_REGEX + r"(?=^—\(" + \
+        next_subparagraph + r"\) |\Z)"
+
+    return re.match(r, text, re.M)
+
+
+def parse_this_paragraph_contents(parent_paragraph_id, paragraph_id, text):
+    par_open, par_close = set_regex_parentheses(parent_paragraph_id)
+    r = r"(^" + par_open + parent_paragraph_id + str(paragraph_id) + par_close + r" [\s\S]+?)" + \
+        PAGE_SPLIT_REGEX + r"(?=^—\(" + parent_paragraph_id + str(paragraph_id) + r"\.1\) |\Z)"
+
+    return re.match(r, text, re.M)
+
+
+def split_paragraphs_rec(revision_text_dict, parent_paragraph_id=""):
     for paragraph_id, text in revision_text_dict.items():
         if not paragraph_id == "contents":
             revision_text_dict[paragraph_id] = {}
             subparagraph_id = 1
 
-            par_open = r""
-            par_close = r""
-            if parent_paragraph_id:
-                par_open += r"—\("
-                par_close += r"\)"
-
-            r = r"^" + par_open + parent_paragraph_id + str(paragraph_id) + par_close + r" [\s\S]+?(?=^—\(" + \
-                parent_paragraph_id + str(paragraph_id) + r"\.1\) |\Z)"
-            res = re.match(r, text, re.M)
-            revision_text_dict[paragraph_id]["contents"] = res[0]
+            res = parse_this_paragraph_contents(parent_paragraph_id, paragraph_id, text)
+            revision_text_dict[paragraph_id]["contents"] = res[1]
             text = text[res.end():]
 
             if text:
-                subparagraph = paragraph_id + r"\." + str(subparagraph_id)
-                next_subparagraph = paragraph_id + r"\." + str(subparagraph_id + 1)
-                r = r"^—\(" + parent_paragraph_id + subparagraph + r"\) [\s\S]+?(?=^—\(" + parent_paragraph_id \
-                    + next_subparagraph + r"\) |\Z)"
-                res = re.match(r, text, re.M)
-
+                res = parse_subparagraph_contents(parent_paragraph_id, paragraph_id, subparagraph_id, text)
                 while res:
-                    revision_text_dict[paragraph_id][str(subparagraph_id)] = res[0]
-                    subparagraph_id += 1
+                    revision_text_dict[paragraph_id][str(subparagraph_id)] = res[1]
                     text = text[res.end():]
-                    subparagraph = paragraph_id + r"\." + str(subparagraph_id)
-                    next_subparagraph = paragraph_id + r"\." + str(subparagraph_id + 1)
-                    r = r"^—\(" + parent_paragraph_id + subparagraph + r"\) [\s\S]+?(?=^—\(" + parent_paragraph_id \
-                        + next_subparagraph + r"\) |\Z)"
-                    res = re.match(r, text, re.M)
+                    subparagraph_id += 1
+                    res = parse_subparagraph_contents(parent_paragraph_id, paragraph_id, subparagraph_id, text)
 
-            get_paragraphs_rec(revision_text_dict[paragraph_id], parent_paragraph_id + paragraph_id + ".")
+            split_paragraphs_rec(revision_text_dict[paragraph_id], parent_paragraph_id + paragraph_id + ".")
 
 
-def get_paragraphs(revision_text_dict, text):
+def split_paragraphs(revision_text_dict, text):
     paragraph_id = 1
     r = r"^[\s\S]*?(?=^1 |\Z)"
     res = re.match(r, text, re.M)
@@ -276,14 +288,29 @@ def get_paragraphs(revision_text_dict, text):
         res = re.match(r, text, re.M)
     while res:
         revision_text_dict[str(paragraph_id)] = res[0]
-        paragraph_id += 1
         text = text[res.end():]
+        paragraph_id += 1
 
         r = r"^" + str(paragraph_id) + r" [\s\S]+?(?=^" + str(paragraph_id + 1) + r" |\Z)"
         res = re.match(r, text, re.M)
 
     if revision_text_dict:
-        get_paragraphs_rec(revision_text_dict)
+        split_paragraphs_rec(revision_text_dict)
+
+
+def parse_chapter_contents(parent_chapter_id, chapter_id, text):
+    r = r"^" + parent_chapter_id + str(chapter_id) + r" (?:.*\n){0,2}?.*?\[[^\dN].*?\]$\n+([\s\S]*?)(?=^" \
+        + parent_chapter_id + str(chapter_id) + r"\.1 (?:.*\n){0,2}?.*?\[[^\dN].*?\]$|\Z)"
+    return re.match(r, text, re.M)
+
+
+def parse_subchapter_contents(parent_chapter_id, chapter_id, subchapter_id, text):
+    subchapter = parent_chapter_id + chapter_id + r"\." + str(subchapter_id)
+    next_subchapter = parent_chapter_id + chapter_id + r"\." + str(subchapter_id + 1)
+    r = r"^" + subchapter + r" (?:.*\n){0,2}?.*?\[([^\dN].*?)\]$\n+([\s\S]*?)(?=^" + next_subchapter + \
+        r" (?:.*\n){0,2}?.*?\[[^\dN].*?\]$|\Z)"
+
+    return re.match(r, text, re.M)
 
 
 def split_chapters_rec(revision_text_dict, parent_chapter_id=""):
@@ -292,56 +319,51 @@ def split_chapters_rec(revision_text_dict, parent_chapter_id=""):
         subchapter_id = 1
 
         if not chapter_id == "contents":
-            r = r"(?:^" + parent_chapter_id + str(chapter_id) + r" (?:.+\n){0,2}?.*?\[[^\dN].*?\]$)\n+([\s\S]*?)(?=^" + \
-                parent_chapter_id + str(chapter_id) + r"\.1 (?:.+\n){0,2}?.*?\[[^\dN].*?\]$|\Z)"
-            res = re.match(r, text, re.M)
+            res = parse_chapter_contents(parent_chapter_id, chapter_id, text)
             revision_text_dict[chapter_id]["contents"] = res[1]
             text = text[res.end():]
 
             if text:
-                subchapter = chapter_id + r"\." + str(subchapter_id)
-                next = chapter_id + r"\." + str(subchapter_id + 1)
-                r = r"^" + parent_chapter_id + subchapter + r" (?:\n.+){0,2}?.*?\[([^\dN].*?)\]$([\s\S]+?)(?=^" + \
-                    parent_chapter_id + next + r" (?:\n.+){0,2}?.*?\[[^\dN].*?\]$|\Z)"
-                res = re.match(r, text, re.M)
-
+                res = parse_subchapter_contents(parent_chapter_id, chapter_id, subchapter_id, text)
                 while res:
                     revision_text_dict[chapter_id][str(subchapter_id)] = res[0]
-                    subchapter_id += 1
                     text = text[res.end():]
-                    subchapter = chapter_id + r"\." + str(subchapter_id)
-                    next = chapter_id + r"\." + str(subchapter_id + 1)
-                    r = r"^" + parent_chapter_id + subchapter + r" (?:\n.+){0,2}?.*?\[([^\dN].*?)\]$([\s\S]+?)(?=^" + parent_chapter_id + next + r" .*(?:\n.+){0,2}?.*?\[[^\dN].*?\]$|\Z)"
-                    res = re.match(r, text, re.M)
+                    subchapter_id += 1
+                    res = parse_subchapter_contents(parent_chapter_id, chapter_id, subchapter_id, text)
 
             split_chapters_rec(revision_text_dict[chapter_id], parent_chapter_id + chapter_id + ".")
         elif text:
-            get_paragraphs(revision_text_dict[chapter_id], text)
+            split_paragraphs(revision_text_dict[chapter_id], text)
+
+
+def save_revision_dict(revision_dict):
+    with open("revision_dict.json", "w") as rd:
+        json.dump(revision_dict, rd, indent=4)
+
+
+def parse_chapter(chapter_id, revision_text):
+    r = r"^" + str(chapter_id) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$\n+([\s\S]+?)(?=^" + str(
+        chapter_id + 1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
+    return re.search(r, revision_text, re.M)
 
 
 def split_revisions_into_chapters(revision_text_dict):
     print("Splitting revision texts into chapters")
 
     for revision_tag, revision_text in revision_text_dict.items():
-        print("Splitting %s" % revision_tag)
+        print("\tSplitting %s" % revision_tag)
         revision_text_dict[revision_tag] = {}
         chapter_id = 1
-        r = r"^" + str(chapter_id) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$\n+([\s\S]+?)(?=^" + str(
-            chapter_id + 1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
-        res = re.search(r, revision_text, re.M)
+        res = parse_chapter(chapter_id, revision_text)
 
         while res:
             revision_text_dict[revision_tag][str(chapter_id)] = res[0]
-            chapter_id += 1
             revision_text = revision_text[res.end():]
-            r = r"^" + str(chapter_id) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$([\s\S]+?)(?=^" + str(
-                chapter_id + 1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
-            res = re.match(r, revision_text, re.M)
+            chapter_id += 1
+            res = parse_chapter(chapter_id, revision_text)
 
         split_chapters_rec(revision_text_dict[revision_tag])
-
-    with open("revision_dict.json", "w") as rd:
-        json.dump(revision_text_dict, rd, indent=4)
+        save_revision_dict(revision_text_dict)
 
     return revision_text_dict
 
@@ -445,7 +467,7 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
             revision_dict = split_revisions_into_chapters(revision_text_dict)
 
         process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache)
-        #save_mapped_references(target_revision_tag, references)
+        save_mapped_references(target_revision_tag, references)
 
         return references
 
@@ -458,7 +480,9 @@ def main(argv):
             port_num = argv[2]
         else:
             port_num = None
+        t = time.time()
         references = map_paragraphs_to_target_revision(sys.argv[1], port_num)
+        print(time.time() - t)
     except (IndexError, FileNotFoundError, URLError):
         print("Usage: \"paragraphMapping.py <tag> <port number>\"\ne.g. \"paragraphMapping.py n4296 9997\"")
 

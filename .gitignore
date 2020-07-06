@@ -6,8 +6,10 @@
 /project/section_mapping/*.txt
 /project/section_mapping/*.pdf
 /project/section_mapping/*.out
-/project/tika_server/*
+/project/tika_server/*.jar
 /project/*.pdf
+
+
 /c-semantics/*
 /cxxdraft-htmlgen/*
 /draft/*
