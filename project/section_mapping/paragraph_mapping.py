@@ -28,7 +28,7 @@ def load_txt_revisions(revision_set, port_num):
     for revision_tag in revision_set:
         try:
             txt_revision = open("%s.txt" % revision_tag, "r")
-            print("\tLoading %s" % revision_tag)
+            print("\tLoading %s.txt" % revision_tag)
             revisions_text_dict[revision_tag] = txt_revision.read()
         except FileNotFoundError:
             try:
@@ -208,6 +208,8 @@ def map_reference(reference, revision_text_dict_chapters, target_revision_tag, r
     referenced_revision_tag = reference["document"]["document"].lower()
     referenced_section = re.split("[:/]", reference["document"]["section"])
 
+    if referenced_section[0] == "8.5.3" and referenced_section[1] == "5.1":
+        x = 0
     if not is_valid_section_format(referenced_section):
         process_reference_error(reference, ref_errors, "Unsupported section format")
         return
@@ -276,6 +278,11 @@ def split_paragraphs_rec(revision_text_dict, parent_paragraph_id=""):
             split_paragraphs_rec(revision_text_dict[paragraph_id], parent_paragraph_id + paragraph_id + ".")
 
 
+def parse_paragraph(paragraph_id, text):
+    r = r"^" + str(paragraph_id) + r" [\s\S]+?(?=^" + str(paragraph_id + 1) + r" |\Z)"
+    return re.match(r, text, re.M)
+
+
 def split_paragraphs(revision_text_dict, text):
     paragraph_id = 1
     r = r"^[\s\S]*?(?=^1 |\Z)"
@@ -283,32 +290,30 @@ def split_paragraphs(revision_text_dict, text):
     revision_text_dict["contents"] = res[0]
     text = text[res.end():]
 
-    if res:
-        r = r"^" + str(paragraph_id) + r" [\s\S]+?(?=^" + str(paragraph_id + 1) + r" |\Z)"
-        res = re.match(r, text, re.M)
+    res = parse_paragraph(paragraph_id, text)
+
     while res:
         revision_text_dict[str(paragraph_id)] = res[0]
         text = text[res.end():]
         paragraph_id += 1
-
-        r = r"^" + str(paragraph_id) + r" [\s\S]+?(?=^" + str(paragraph_id + 1) + r" |\Z)"
-        res = re.match(r, text, re.M)
+        res = parse_paragraph(paragraph_id, text)
 
     if revision_text_dict:
         split_paragraphs_rec(revision_text_dict)
 
 
 def parse_chapter_contents(parent_chapter_id, chapter_id, text):
-    r = r"^" + parent_chapter_id + str(chapter_id) + r" (?:.*\n){0,2}?.*?\[[^\dN].*?\]$\n+([\s\S]*?)(?=^" \
-        + parent_chapter_id + str(chapter_id) + r"\.1 (?:.*\n){0,2}?.*?\[[^\dN].*?\]$|\Z)"
+    r = r"^" + parent_chapter_id + str(chapter_id) + r" (?:.*\n){0,2}?.*?\[[^\d\sN].*?\]$\n+([\s\S]*?)(?=^" \
+        + parent_chapter_id + str(chapter_id) + r"\.1 (?:.*\n){0,2}?.*?\[[^\d\sN].*?\]$|\Z)"
+
     return re.match(r, text, re.M)
 
 
 def parse_subchapter_contents(parent_chapter_id, chapter_id, subchapter_id, text):
     subchapter = parent_chapter_id + chapter_id + r"\." + str(subchapter_id)
     next_subchapter = parent_chapter_id + chapter_id + r"\." + str(subchapter_id + 1)
-    r = r"^" + subchapter + r" (?:.*\n){0,2}?.*?\[([^\dN].*?)\]$\n+([\s\S]*?)(?=^" + next_subchapter + \
-        r" (?:.*\n){0,2}?.*?\[[^\dN].*?\]$|\Z)"
+    r = r"^" + subchapter + r" (?:.*\n){0,2}?.*?\[([^\d\sN].*?)\]$\n+([\s\S]*?)(?=^" + next_subchapter + \
+        r" (?:.*\n){0,2}?.*?\[[^\d\sN].*?\]$|\Z)"
 
     return re.match(r, text, re.M)
 
@@ -336,22 +341,20 @@ def split_chapters_rec(revision_text_dict, parent_chapter_id=""):
             split_paragraphs(revision_text_dict[chapter_id], text)
 
 
-def save_revision_dict(revision_dict):
-    with open("revision_dict.json", "w") as rd:
+def save_revision_dict(revision_dict, revision_tag):
+    with open("cache/revision_dict_%s.json" % revision_tag, "w") as rd:
         json.dump(revision_dict, rd, indent=4)
 
 
 def parse_chapter(chapter_id, revision_text):
-    r = r"^" + str(chapter_id) + r" .+(?:\n.+){0,2}?.*\[(\D.*)\]$\n+([\s\S]+?)(?=^" + str(
-        chapter_id + 1) + r" .+(?:\n.+){0,2}?.*\[\D.+\]$|\Z)"
+    r = r"^" + str(chapter_id) + r" (?:.*\n){0,2}?.*\[([^\d\sN].*)\]$\n+([\s\S]*?)" \
+        r"(?=^" + str(chapter_id + 1) + r" (?:.*\n){0,2}?.*?\[[^\d\sN].*\]$|\Z)"
     return re.search(r, revision_text, re.M)
 
 
 def split_revisions_into_chapters(revision_text_dict):
-    print("Splitting revision texts into chapters")
-
     for revision_tag, revision_text in revision_text_dict.items():
-        print("\tSplitting %s" % revision_tag)
+        print("\tSplitting %s text into chapters" % revision_tag)
         revision_text_dict[revision_tag] = {}
         chapter_id = 1
         res = parse_chapter(chapter_id, revision_text)
@@ -363,22 +366,22 @@ def split_revisions_into_chapters(revision_text_dict):
             res = parse_chapter(chapter_id, revision_text)
 
         split_chapters_rec(revision_text_dict[revision_tag])
-        save_revision_dict(revision_text_dict)
+        save_revision_dict(revision_text_dict[revision_tag], revision_tag)
 
     return revision_text_dict
 
 
-def get_chapters(revision_text_dict):
-    print("Splitting revision texts into chapters")
-    revision_chapters_dict = {}
-    for revision_tag, revision_text in revision_text_dict.items():
-        referenced_chapters = re.findall(CHAPTER_PARSING_REGEX, revision_text, re.M)
-        chapter_dict = {}
-        for entry in referenced_chapters:
-            chapter_dict[entry[0]] = (entry[1], entry[2])
-        revision_chapters_dict[revision_tag] = chapter_dict
-
-    return revision_chapters_dict
+# def get_chapters(revision_text_dict):
+#     print("Splitting revision texts into chapters")
+#     revision_chapters_dict = {}
+#     for revision_tag, revision_text in revision_text_dict.items():
+#         referenced_chapters = re.findall(CHAPTER_PARSING_REGEX, revision_text, re.M)
+#         chapter_dict = {}
+#         for entry in referenced_chapters:
+#             chapter_dict[entry[0]] = (entry[1], entry[2])
+#         revision_chapters_dict[revision_tag] = chapter_dict
+#
+#     return revision_chapters_dict
 
 
 def map_referenced_paragraphs(references, revision_dict, target_revision_tag, ref_errors, section_mapping,
@@ -389,13 +392,20 @@ def map_referenced_paragraphs(references, revision_dict, target_revision_tag, re
 
 
 def load_revision_dict(revision_text_dict):
-    try:
-        with open("revision_dict.json", "r") as test:
-            revision_dict_chapters = json.loads(test.read())
-    except FileNotFoundError:
-        revision_dict_chapters = split_revisions_into_chapters(revision_text_dict)
+    revision_dict = {}
 
-    return revision_dict_chapters
+    for revision_tag in revision_text_dict:
+        try:
+            with open("cache/revision_dict_%s.json" % revision_tag, "r") as rev_dict:
+                revision_dict[revision_tag] = json.loads(rev_dict.read())
+            print("\tLoaded %s dictionary" % revision_tag)
+        except FileNotFoundError:
+            print("\t%s dictionary not found, attempting to create from text version" % revision_tag)
+            rd = split_revisions_into_chapters({
+                revision_tag : revision_text_dict[revision_tag]})
+            revision_dict[revision_tag] = rd[revision_tag]
+
+    return revision_dict
 
 
 def write_errors(ref_errors):
@@ -463,8 +473,8 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
         mapping_cache = load_mapping_cache(target_revision_tag)
         revision_dict = load_revision_dict(revision_text_dict)
 
-        if len(revision_dict) != len(revision_set):
-            revision_dict = split_revisions_into_chapters(revision_text_dict)
+        # if len(revision_dict) != len(revision_set):
+        #     revision_dict = split_revisions_into_chapters(revision_text_dict)
 
         process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache)
         save_mapped_references(target_revision_tag, references)
@@ -480,9 +490,7 @@ def main(argv):
             port_num = argv[2]
         else:
             port_num = None
-        t = time.time()
         references = map_paragraphs_to_target_revision(sys.argv[1], port_num)
-        print(time.time() - t)
     except (IndexError, FileNotFoundError, URLError):
         print("Usage: \"paragraphMapping.py <tag> <port number>\"\ne.g. \"paragraphMapping.py n4296 9997\"")
 

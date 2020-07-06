@@ -1,14 +1,13 @@
 .idea/
 /**/__pycache__
 /project/section_mapping/*.json
-!/project/section_mapping/mapping_cache_*.json
+/project/section_mapping/cache/revision_dict_*.json
 /project/section_mapping/tools/*.txt
 /project/section_mapping/*.txt
 /project/section_mapping/*.pdf
 /project/section_mapping/*.out
 /project/tika_server/*.jar
 /project/*.pdf
-
 
 /c-semantics/*
 /cxxdraft-htmlgen/*
