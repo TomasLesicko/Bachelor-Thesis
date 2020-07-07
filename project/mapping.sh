@@ -10,6 +10,7 @@ then
     echo "compiling referenceExtractor.cpp"
     g++ referenceExtractor.cpp -std=c++17 -lstdc++fs -o referenceExtractor.out
 fi
+echo "extracting references from semantics"
 ./referenceExtractor.out ../../c-semantics/semantics/cpp
 python3.6 annotatePDF.py "$@"
 cd ..

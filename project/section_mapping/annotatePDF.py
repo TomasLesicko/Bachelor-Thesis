@@ -141,7 +141,7 @@ def process_reference(doc, ref, toc_page_count):
             highlight_section(page_rect[0], page_rect[1], ref)
             annotate_section(page_rect[0], page_rect[1], ref)
         else:
-            x = 0 # handle faulty stuff somehow
+            print("[Error] Couldn't find the corresponding block of %s:%s" % (section[0], section[1]))
 
 
 def annotate_document(doc, target_pdf_tag, port_num):
@@ -182,7 +182,7 @@ def main(argv):
         annotate_document(target_PDF, argv[1].lower(), port_num)
     except (RuntimeError, IndexError, FileNotFoundError) as e:
         print(e)
-        print("annotatePDF arguments required: \"<tag> <port number>\"\ne.g. \"n4296 9997\"")
+        print("annotatePDF arguments required: \"tag [port number]\"\ne.g. \"n4296 9997\"")
 
 
 if __name__ == "__main__":

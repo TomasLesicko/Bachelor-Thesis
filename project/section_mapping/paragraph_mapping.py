@@ -351,7 +351,7 @@ def save_revision_dict(revision_dict, revision_tag):
 
 def parse_chapter(chapter_id, revision_text):
     r = r"^" + str(chapter_id) + r" (?:.*\n){0,2}?.*\[([^\d\sN].*)\]$\n+([\s\S]*?)" \
-        r"(?=^" + str(chapter_id + 1) + r" (?:.*\n){0,2}?.*?\[[^\d\sN].*\]$|\Z)"
+                                 r"(?=^" + str(chapter_id + 1) + r" (?:.*\n){0,2}?.*?\[[^\d\sN].*\]$|\Z)"
     return re.search(r, revision_text, re.M)
 
 
@@ -392,7 +392,7 @@ def load_revision_dict(revision_text_dict):
         except FileNotFoundError:
             print("\t%s dictionary not found, attempting to create from text version" % revision_tag)
             rd = split_revisions_into_chapters({
-                revision_tag : revision_text_dict[revision_tag]})
+                revision_tag: revision_text_dict[revision_tag]})
             revision_dict[revision_tag] = rd[revision_tag]
 
     return revision_dict
@@ -426,18 +426,18 @@ def save_mapped_references(target_revision_tag, references):
 
 
 def load_section_mapping(target_revision_tag, references, revision_tags):
+    # try:
+    #     with open("section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
+    #         section_mapping = json.load(section_mapping_file)
+    # except FileNotFoundError:
+    #     print("Couldn't find section mapping to %s, attempting to create it" % target_revision_tag)
+    chapter_mapping.map_sections(target_revision_tag, references, revision_tags)
     try:
         with open("section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
             section_mapping = json.load(section_mapping_file)
     except FileNotFoundError:
-        print("Couldn't find section mapping to %s, attempting to create it" % target_revision_tag)
-        chapter_mapping.map_sections(target_revision_tag, references, revision_tags)
-        try:
-            with open("section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
-                section_mapping = json.load(section_mapping_file)
-        except FileNotFoundError:
-            print("Failed to create section mapping to %s" % target_revision_tag)
-            raise
+        print("Failed to create section mapping to %s" % target_revision_tag)
+        raise
     return section_mapping
 
 
@@ -465,15 +465,15 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
     revision_set.add(target_revision_tag)
     chapter_mapping.find_referenced_revision_tags(references, revision_set)
 
-    section_mapping = load_section_mapping(target_revision_tag, references,revision_set)
-    #chapter_mapping.map_sections(target_revision_tag, references, revision_set)
+    section_mapping = load_section_mapping(target_revision_tag, references, revision_set)
+    # chapter_mapping.map_sections(target_revision_tag, references, revision_set)
     revision_text_dict = load_txt_revisions(revision_set, port_num)
     if len(revision_text_dict) == len(revision_set):  # all revisions loaded correctly
         mapping_cache = load_mapping_cache(target_revision_tag)
         revision_dict = load_revision_dict(revision_text_dict)
 
         process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache)
-        #save_mapped_references(target_revision_tag, references) # debug only, not necessary to save it otherwise
+        # save_mapped_references(target_revision_tag, references) # debug only, not necessary to save it otherwise
 
         return references
 
