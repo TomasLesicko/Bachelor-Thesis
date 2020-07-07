@@ -100,8 +100,8 @@ def find_chapter_start(chapter, block):
 
 
 def find_referenced_paragraph_page(doc, page_number, toc_page_count, section, stoptmp, chapter_start):
-    if stoptmp > 20:
-        print("Over 20 pages and no result, you probably got a bug in here @ ref %s:%s" % (section[0], section[1]))
+    if stoptmp > 200:
+        print("Over 200 pages and no result, you probably got a bug in here @ ref %s:%s" % (section[0], section[1]))
         return None, None
 
     page = doc[toc_page_count + page_number - 1]

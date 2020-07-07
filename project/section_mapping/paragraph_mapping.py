@@ -11,12 +11,6 @@ from tools.revision_PDF_to_txt import read_referenced_revision
 
 DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.7
 
-# PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?) ([\s\S]+?)(?=(?:^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
-# PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
-#
-# CHAPTER_PARSING_REGEX = r"^(?:Annex )?([A-Z0-9](?:\d)*(?:\.\d+)*)(?: (?:.+\n){0,3}?.*\[(\D\S+)\]$([\s\S]+?))(?=(?:^(?:Annex )?[A-Z0-9](?:\d)*(?:\.\d+)* (?:.+\n){0,3}?.*\[\D\S+\]$)|\Z)"
-# CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
-
 PAGE_SPLIT_REGEX = r"(?:^(?:\d{1,3}\)[\s\S]+?)?§ [\d\.]+ \d{1,4}\s+[c©]{1,2}\s*ISO\/IEC N\d{1,4}\s+)?"
 
 
@@ -380,19 +374,6 @@ def split_revisions_into_chapters(revision_text_dict):
     return revision_text_dict
 
 
-# def get_chapters(revision_text_dict):
-#     print("Splitting revision texts into chapters")
-#     revision_chapters_dict = {}
-#     for revision_tag, revision_text in revision_text_dict.items():
-#         referenced_chapters = re.findall(CHAPTER_PARSING_REGEX, revision_text, re.M)
-#         chapter_dict = {}
-#         for entry in referenced_chapters:
-#             chapter_dict[entry[0]] = (entry[1], entry[2])
-#         revision_chapters_dict[revision_tag] = chapter_dict
-#
-#     return revision_chapters_dict
-
-
 def map_referenced_paragraphs(references, revision_dict, target_revision_tag, ref_errors, section_mapping,
                               mapping_cache):
     print("Mapping references to %s" % target_revision_tag)
@@ -492,7 +473,7 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
         revision_dict = load_revision_dict(revision_text_dict)
 
         process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache)
-        save_mapped_references(target_revision_tag, references)
+        #save_mapped_references(target_revision_tag, references) # debug only, not necessary to save it otherwise
 
         return references
 
