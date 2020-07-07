@@ -3,20 +3,19 @@ import re
 import json
 import difflib
 from urllib.error import URLError
+from requests.exceptions import ConnectionError
 import chapter_mapping
+import os
 import time
-
-from chapter_mapping import map_sections
-
 from tools.revision_PDF_to_txt import read_referenced_revision
 
 DIFFLIB_MATCHER_RATIO_DEFAULT_THRESHOLD = 0.7
 
-PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?) ([\s\S]+?)(?=(?:^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
-PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
-
-CHAPTER_PARSING_REGEX = r"^(?:Annex )?([A-Z0-9](?:\d)*(?:\.\d+)*)(?: (?:.+\n){0,3}?.*\[(\D\S+)\]$([\s\S]+?))(?=(?:^(?:Annex )?[A-Z0-9](?:\d)*(?:\.\d+)* (?:.+\n){0,3}?.*\[\D\S+\]$)|\Z)"
-CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
+# PARAGRAPH_PARSING_REGEX = r"(?:^—?\(?(\d+(?:\.\d+)*)\)?) ([\s\S]+?)(?=(?:^—?\(?(\d+(?:\.\d+)*)\)?|\Z))"
+# PARAGRAPH_PARSING_REGEX_NUM_ID = r"(\d+(?:\.\d+)*)"
+#
+# CHAPTER_PARSING_REGEX = r"^(?:Annex )?([A-Z0-9](?:\d)*(?:\.\d+)*)(?: (?:.+\n){0,3}?.*\[(\D\S+)\]$([\s\S]+?))(?=(?:^(?:Annex )?[A-Z0-9](?:\d)*(?:\.\d+)* (?:.+\n){0,3}?.*\[\D\S+\]$)|\Z)"
+# CHAPTER_PARSING_REGEX_NUM_ID = r"[A-Z0-9](?:\d)*(?:\.\d+)*"
 
 PAGE_SPLIT_REGEX = r"(?:^(?:\d{1,3}\)[\s\S]+?)?§ [\d\.]+ \d{1,4}\s+[c©]{1,2}\s*ISO\/IEC N\d{1,4}\s+)?"
 
@@ -27,13 +26,20 @@ def load_txt_revisions(revision_set, port_num):
 
     for revision_tag in revision_set:
         try:
-            txt_revision = open("%s.txt" % revision_tag, "r")
+            txt_revision = open("tools/%s.txt" % revision_tag, "r")
             print("\tLoading %s.txt" % revision_tag)
             revisions_text_dict[revision_tag] = txt_revision.read()
         except FileNotFoundError:
+            print("Couldn't find {0}.txt, attempting to create from {0}.pdf".format(revision_tag))
             try:
-                revisions_text_dict[revision_tag] = read_referenced_revision(revision_tag, port_num)
-            except:
+                if port_num:
+                    txt_revision = read_referenced_revision(revision_tag, port_num, "tools/")
+                    if txt_revision:
+                        revisions_text_dict[revision_tag] = txt_revision
+                else:
+                    print("Failed to load %s.txt, make sure tika server is running and rerun the script "
+                          "with the correct port number as second argument" % revision_tag)
+            except ConnectionError:
                 print(
                     "[Error] Missing %s.txt, make sure tika server is running with correct port number" % revision_tag)
 
@@ -116,9 +122,14 @@ def target_revision_find_paragraph_id(target_revision_paragraphs, referenced_par
 
 
 def is_in_mapping_cache(referenced_revision_tag, referenced_section, mapping_cache):
-    s = ":".join(referenced_section) ## a.b/c ?
-    if referenced_revision_tag in mapping_cache and s in mapping_cache[referenced_revision_tag]:
-        return mapping_cache[referenced_revision_tag][s]
+    s1 = ":".join(referenced_section)
+    s2 = "/".join(referenced_section)
+    if referenced_revision_tag in mapping_cache:
+        cache_tag = mapping_cache[referenced_revision_tag]
+        if s1 in cache_tag:
+            return cache_tag[s1]
+        if s2 in cache_tag:
+            return cache_tag[s2]
 
     return None
 
@@ -208,8 +219,6 @@ def map_reference(reference, revision_text_dict_chapters, target_revision_tag, r
     referenced_revision_tag = reference["document"]["document"].lower()
     referenced_section = re.split("[:/]", reference["document"]["section"])
 
-    if referenced_section[0] == "8.5.3" and referenced_section[1] == "5.1":
-        x = 0
     if not is_valid_section_format(referenced_section):
         process_reference_error(reference, ref_errors, "Unsupported section format")
         return
@@ -435,13 +444,13 @@ def save_mapped_references(target_revision_tag, references):
         json.dump(references, mapped_references, indent=4)
 
 
-def load_section_mapping(target_revision_tag, references):
+def load_section_mapping(target_revision_tag, references, revision_tags):
     try:
         with open("section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
             section_mapping = json.load(section_mapping_file)
     except FileNotFoundError:
         print("Couldn't find section mapping to %s, attempting to create it" % target_revision_tag)
-        map_sections(target_revision_tag, references)
+        chapter_mapping.map_sections(target_revision_tag, references, revision_tags)
         try:
             with open("section_mapping_to_%s.json" % target_revision_tag, "r") as section_mapping_file:
                 section_mapping = json.load(section_mapping_file)
@@ -452,10 +461,19 @@ def load_section_mapping(target_revision_tag, references):
 
 
 def load_mapping_cache(target_revision_tag):
+    cache_folder = "cache/"
+    cache_name = "mapping_cache_%s.json" % target_revision_tag
+
     try:
-        with open("cache/mapping_cache_%s.json" % target_revision_tag, "r") as cache:
+        with open(cache_folder + cache_name, "r") as cache:
             return json.loads(cache.read())
     except FileNotFoundError:
+        print("Cache not found, mapping might take slightly longer")
+        return {}
+    except json.decoder.JSONDecodeError:
+        print("Wrong mapping cache format. Make sure all manual changes to the cache "
+              "follow the format, check %sold_%s for details" % (cache_folder, cache_name))
+        os.rename(cache_folder + cache_name, cache_folder + "old_" + cache_name)
         return {}
 
 
@@ -466,15 +484,12 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
     revision_set.add(target_revision_tag)
     chapter_mapping.find_referenced_revision_tags(references, revision_set)
 
-    section_mapping = load_section_mapping(target_revision_tag, references)
-    map_sections(target_revision_tag, references, revision_set)
+    section_mapping = load_section_mapping(target_revision_tag, references,revision_set)
+    #chapter_mapping.map_sections(target_revision_tag, references, revision_set)
     revision_text_dict = load_txt_revisions(revision_set, port_num)
     if len(revision_text_dict) == len(revision_set):  # all revisions loaded correctly
         mapping_cache = load_mapping_cache(target_revision_tag)
         revision_dict = load_revision_dict(revision_text_dict)
-
-        # if len(revision_dict) != len(revision_set):
-        #     revision_dict = split_revisions_into_chapters(revision_text_dict)
 
         process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache)
         save_mapped_references(target_revision_tag, references)

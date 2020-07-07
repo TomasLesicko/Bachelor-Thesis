@@ -2,7 +2,7 @@ import sys
 import re
 import os
 from tika import tika, parser
-from urllib.error import URLError
+from requests.exceptions import ConnectionError
 
 
 def handle_error(e, msg):
@@ -10,9 +10,9 @@ def handle_error(e, msg):
     print(msg)
 
 
-def save_txt_revision(txt_revision, revision_tag):
+def save_txt_revision(txt_revision, revision_tag, save_to=""):
     try:
-        with open("%s.txt" % revision_tag, 'x') as f:
+        with open("%s%s.txt" % (save_to, revision_tag), 'x') as f:
             print("\tWriting to %s.txt" % revision_tag)
             f.write(txt_revision)
     except FileExistsError:
@@ -30,19 +30,20 @@ def read_referenced_revisions(revision_set, port_num):
         read_referenced_revision(revision_tag, port_num)
 
 
-def read_referenced_revision(revision_tag, port_num):
+def read_referenced_revision(revision_tag, port_num, save_to=""):
     path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'draft/papers/',
                         revision_tag.lower() + ".pdf")
-    print("\tLoading %s" % revision_tag)
+    print("\tLoading %s.txt" % revision_tag)
     try:
         tika.TikaClientOnly = True
         contents = parser.from_file(path, "http://localhost:" + port_num + "/")["content"]
-        save_txt_revision(contents, revision_tag)
+        save_txt_revision(contents, revision_tag, save_to)
         return contents
     except FileNotFoundError as fnfe:
         handle_error(fnfe, "[Error] Could not find revision %s.pdf in draft/papers" % revision_tag)
-    except URLError as urle:
-        handle_error(urle, "[Error] Wrong port number: %s" % port_num)
+    except ConnectionError as ce:
+        handle_error(ce, "[Error] Wrong port number: %s, make sure tika server is running "
+                         "with correct port number" % port_num)
 
 
 def main(argv):
