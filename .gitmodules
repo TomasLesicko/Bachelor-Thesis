@@ -1,9 +1,11 @@
 [submodule "draft"]
 	path = draft
 	url = https://github.com/cplusplus/draft
+        ignore = all
 [submodule "c-semantics"]
 	path = c-semantics
 	url = https://github.com/kframework/c-semantics.git
 [submodule "cxxdraft-htmlgen"]
 	path = cxxdraft-htmlgen
 	url = https://github.com/Eelis/cxxdraft-htmlgen.git
+        ignore = all

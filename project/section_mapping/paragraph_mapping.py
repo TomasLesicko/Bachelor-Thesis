@@ -524,7 +524,7 @@ def map_paragraphs_to_target_revision(target_revision_tag, port_num):
 
         process_references(references, revision_dict, target_revision_tag, section_mapping, mapping_cache,
                            coverage_dict)
-        # save_mapped_references(target_revision_tag, references) # debug only, not necessary to save it otherwise
+        save_mapped_references(target_revision_tag, references) # debug only, not necessary to save it otherwise
 
         return references, coverage_dict
 

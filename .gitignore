@@ -10,6 +10,3 @@
 /project/tika_server/*.jar
 /project/*.pdf
 
-/c-semantics/*
-/cxxdraft-htmlgen/*
-/draft/*

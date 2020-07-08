@@ -1,0 +1,2306 @@
+[
+    {
+        "document": {
+            "document": "n4296",
+            "section": "5.2.3:2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/typing/expr.k",
+            "lines": [
+                {
+                    "from": "160",
+                    "to": "160"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 7.6.1.3"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "5.2.3:1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/typing/expr.k",
+            "lines": [
+                {
+                    "from": "163",
+                    "to": "163"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 7.6.1.3"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "5.2.3:2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/value-category.k",
+            "lines": [
+                {
+                    "from": "124",
+                    "to": "124"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 7.6.1.3"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "5.2.3:1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/value-category.k",
+            "lines": [
+                {
+                    "from": "127",
+                    "to": "127"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 7.6.1.3"
+    },
+    {
+        "document": {
+            "document": "N4296",
+            "section": "3.2/3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "87",
+                    "to": "91"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 6.3"
+    },
+    {
+        "document": {
+            "document": "N4778",
+            "section": "6.3:8",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "88",
+                    "to": "91"
+                }
+            ]
+        },
+        "similarity": 0.9836065573770492,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "N4296",
+            "section": "11.4.6:15",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "98",
+                    "to": "102"
+                }
+            ]
+        },
+        "similarity": 0.961038961038961,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "N4778",
+            "section": "11.4.6:15",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "99",
+                    "to": "102"
+                }
+            ]
+        },
+        "similarity": 0.9736842105263158,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "13.9:8",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "368",
+                    "to": "368"
+                }
+            ]
+        },
+        "similarity": 0.9790794979079498,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.8:7",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "372",
+                    "to": "372"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "N4296",
+            "section": "12.8:15.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "422",
+                    "to": "422"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "N4296",
+            "section": "12.8:15.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "460",
+                    "to": "460"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "N4296",
+            "section": "12.8:15.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "472",
+                    "to": "472"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "N4296",
+            "section": "12.8:15.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "475",
+                    "to": "475"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.8:2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "488",
+                    "to": "490"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.8:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "504",
+                    "to": "504"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.6",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "550",
+                    "to": "550"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.7",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "550",
+                    "to": "550"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "609",
+                    "to": "609"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "615",
+                    "to": "615"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "619",
+                    "to": "619"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "626",
+                    "to": "626"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "11.10.2:7",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "635",
+                    "to": "635"
+                }
+            ]
+        },
+        "similarity": 0.9597667638483965,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.6.2:8.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "646",
+                    "to": "648"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.6.2:8.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "660",
+                    "to": "661"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.6.2:8.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "672",
+                    "to": "672"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.8",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "701",
+                    "to": "701"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.10",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "704",
+                    "to": "704"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.1:4.9",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "708",
+                    "to": "708"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 11.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.8:2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "720",
+                    "to": "720"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.8:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "728",
+                    "to": "728"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter None"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "11.4.6:7",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "813",
+                    "to": "813"
+                }
+            ]
+        },
+        "similarity": 0.9770992366412213,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "11.4.6:7.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "823",
+                    "to": "823"
+                }
+            ]
+        },
+        "similarity": 0.988950276243094,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "11.4.6:7.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "853",
+                    "to": "853"
+                }
+            ]
+        },
+        "similarity": 0.9830508474576272,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "11.4.6:8.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/class.k",
+            "lines": [
+                {
+                    "from": "893",
+                    "to": "893"
+                }
+            ]
+        },
+        "similarity": 0.935064935064935,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:6.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "110",
+                    "to": "110"
+                }
+            ]
+        },
+        "similarity": 0.9743589743589743,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "8.5:6.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "113",
+                    "to": "113"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 9.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:6.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "121",
+                    "to": "121"
+                }
+            ]
+        },
+        "similarity": 0.9922480620155039,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "8.5:12",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "168",
+                    "to": "168"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 9.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:7.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "172",
+                    "to": "172"
+                }
+            ]
+        },
+        "similarity": 0.7858880778588808,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:7.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "175",
+                    "to": "175"
+                }
+            ]
+        },
+        "similarity": 0.9925925925925926,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:7.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "179",
+                    "to": "179"
+                }
+            ]
+        },
+        "similarity": 0.9925925925925926,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "8.5:7.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "179",
+                    "to": "179"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 9.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:8.1.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "184",
+                    "to": "184"
+                }
+            ]
+        },
+        "similarity": 0.8186813186813187,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:8.1.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "194",
+                    "to": "194"
+                }
+            ]
+        },
+        "similarity": 0.7704590818363274,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:8.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "204",
+                    "to": "204"
+                }
+            ]
+        },
+        "similarity": 0.9787234042553191,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "8.5:8.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "207",
+                    "to": "207"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 9.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:17.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "223",
+                    "to": "223"
+                }
+            ]
+        },
+        "similarity": 0.8791208791208791,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:17.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "227",
+                    "to": "227"
+                }
+            ]
+        },
+        "similarity": 0.9612403100775194,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:17.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "232",
+                    "to": "232"
+                }
+            ]
+        },
+        "similarity": 0.9081364829396326,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:17.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "238",
+                    "to": "238"
+                }
+            ]
+        },
+        "similarity": 0.9925925925925926,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:17.6.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "242",
+                    "to": "242"
+                }
+            ]
+        },
+        "similarity": 0.725609756097561,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4.4:3.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "273",
+                    "to": "273"
+                }
+            ]
+        },
+        "similarity": 0.9554794520547946,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4.4:3.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "278",
+                    "to": "278"
+                }
+            ]
+        },
+        "similarity": 0.9514563106796117,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "8.5.4:3.5",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "284",
+                    "to": "285"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 9.4.4"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4.4:3.9",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/initializer.k",
+            "lines": [
+                {
+                    "from": "292",
+                    "to": "292"
+                }
+            ]
+        },
+        "similarity": 0.9282470481380564,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.6:3.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "126",
+                    "to": "126"
+                }
+            ]
+        },
+        "similarity": 0.8888888888888888,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "3.5:3.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "130",
+                    "to": "130"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 6.6"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "11.4.8.2:6",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "138",
+                    "to": "138"
+                }
+            ]
+        },
+        "similarity": 0.7175572519083969,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.6:4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "145",
+                    "to": "145"
+                }
+            ]
+        },
+        "similarity": 0.9116117850953206,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.6:5",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "148",
+                    "to": "148"
+                }
+            ]
+        },
+        "similarity": 0.9942196531791907,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.6:4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "153",
+                    "to": "153"
+                }
+            ]
+        },
+        "similarity": 0.9116117850953206,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.6:4.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "160",
+                    "to": "160"
+                }
+            ]
+        },
+        "similarity": 0.9777777777777777,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.6:4.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "163",
+                    "to": "163"
+                }
+            ]
+        },
+        "similarity": 0.9777777777777777,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "3.5:6",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "166",
+                    "to": "166"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 6.6"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4.4:3.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "422",
+                    "to": "422"
+                }
+            ]
+        },
+        "similarity": 0.9514563106796117,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4:17.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/declarator.k",
+            "lines": [
+                {
+                    "from": "432",
+                    "to": "432"
+                }
+            ]
+        },
+        "similarity": 0.9081364829396326,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.7.1:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/enum.k",
+            "lines": [
+                {
+                    "from": "314",
+                    "to": "314"
+                }
+            ]
+        },
+        "similarity": 0.9881046788263284,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.7.1:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/decl/enum.k",
+            "lines": [
+                {
+                    "from": "319",
+                    "to": "319"
+                }
+            ]
+        },
+        "similarity": 0.9881046788263284,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4778",
+            "section": "14.2:5",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/stmt/try.k",
+            "lines": [
+                {
+                    "from": "53",
+                    "to": "58"
+                }
+            ]
+        },
+        "similarity": 0.986822840409956,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.1:8.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "376",
+                    "to": "376"
+                }
+            ]
+        },
+        "similarity": 0.9723756906077348,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.1:8.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "377",
+                    "to": "377"
+                }
+            ]
+        },
+        "similarity": 0.9700598802395209,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.1:8.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "378",
+                    "to": "378"
+                }
+            ]
+        },
+        "similarity": 0.9641255605381166,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.1:8.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "379",
+                    "to": "379"
+                }
+            ]
+        },
+        "similarity": 0.9780564263322884,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.1:8.5",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "380",
+                    "to": "380"
+                }
+            ]
+        },
+        "similarity": 0.8534423994546694,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.2:2.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "599",
+                    "to": "599"
+                }
+            ]
+        },
+        "similarity": 0.9387755102040817,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.2:2.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "604",
+                    "to": "604"
+                }
+            ]
+        },
+        "similarity": 0.9350961538461539,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.2:2.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "608",
+                    "to": "608"
+                }
+            ]
+        },
+        "similarity": 0.7641509433962265,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "6.5.2:2.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/name.k",
+            "lines": [
+                {
+                    "from": "615",
+                    "to": "615"
+                }
+            ]
+        },
+        "similarity": 0.9527896995708155,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.1.1.1:2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "101",
+                    "to": "101"
+                }
+            ]
+        },
+        "similarity": 0.7980727113447219,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.1.1.1:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "105",
+                    "to": "105"
+                }
+            ]
+        },
+        "similarity": 0.96875,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.1.1.1:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "108",
+                    "to": "108"
+                }
+            ]
+        },
+        "similarity": 0.96875,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.1.1.1:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "113",
+                    "to": "113"
+                }
+            ]
+        },
+        "similarity": 0.96875,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.1.2:7",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "118",
+                    "to": "118"
+                }
+            ]
+        },
+        "similarity": 0.7917174177831913,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.1.3:1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "123",
+                    "to": "123"
+                }
+            ]
+        },
+        "similarity": 0.8711755233494364,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.3.1.4:1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "275",
+                    "to": "275"
+                }
+            ]
+        },
+        "similarity": 0.9811738648947951,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "13.3.1:5.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "299",
+                    "to": "299"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 12.4.1"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "13.3.1:5.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "299",
+                    "to": "299"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 12.4.1"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "12.4.3:2.2",
+            "TODO": "true"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "721",
+                    "to": "721"
+                }
+            ]
+        },
+        "similarity": 0.7709750566893424,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "12.4.3.2:4.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "893",
+                    "to": "893"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "12.4.3.2:4.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "904",
+                    "to": "904"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "12.4.3.2:4.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "911",
+                    "to": "911"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "12.4.3.2:4.4.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "918",
+                    "to": "918"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "12.4.3.2:4.4.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "925",
+                    "to": "925"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "12.4.3.2:4.4.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "932",
+                    "to": "932"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "12.4.3.2:4.4.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "941",
+                    "to": "941"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "13.3.3.2:3.1.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "1015",
+                    "to": "1022"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "13.3.3.2:3.1.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/overloading.k",
+            "lines": [
+                {
+                    "from": "1029",
+                    "to": "1032"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced section in referenced revision (n4296)"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.16:2.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/conditional.k",
+            "lines": [
+                {
+                    "from": "62",
+                    "to": "62"
+                }
+            ]
+        },
+        "similarity": 0.9775051124744376,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.16:2.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/conditional.k",
+            "lines": [
+                {
+                    "from": "71",
+                    "to": "71"
+                }
+            ]
+        },
+        "similarity": 0.9948453608247423,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.16:4",
+            "TODO": "true"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/conditional.k",
+            "lines": [
+                {
+                    "from": "75",
+                    "to": "75"
+                }
+            ]
+        },
+        "similarity": 0.7137809187279152,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.16:6",
+            "TODO": "true"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/conditional.k",
+            "lines": [
+                {
+                    "from": "94",
+                    "to": "94"
+                }
+            ]
+        },
+        "similarity": 0.9774127310061602,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "5.2.3:1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "33",
+                    "to": "38"
+                },
+                {
+                    "from": "41",
+                    "to": "43"
+                },
+                {
+                    "from": "46",
+                    "to": "51"
+                },
+                {
+                    "from": "57",
+                    "to": "59"
+                },
+                {
+                    "from": "62",
+                    "to": "68"
+                },
+                {
+                    "from": "76",
+                    "to": "80"
+                },
+                {
+                    "from": "85",
+                    "to": "92"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 7.6.1.3"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "5.2.3:2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "33",
+                    "to": "38"
+                },
+                {
+                    "from": "41",
+                    "to": "43"
+                },
+                {
+                    "from": "46",
+                    "to": "51"
+                },
+                {
+                    "from": "57",
+                    "to": "59"
+                },
+                {
+                    "from": "62",
+                    "to": "68"
+                },
+                {
+                    "from": "76",
+                    "to": "80"
+                },
+                {
+                    "from": "85",
+                    "to": "92"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 7.6.1.3"
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.8:3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "147",
+                    "to": "147"
+                },
+                {
+                    "from": "153",
+                    "to": "153"
+                }
+            ]
+        },
+        "similarity": 0.9911190053285968,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.8:4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "157",
+                    "to": "157"
+                }
+            ]
+        },
+        "similarity": 0.8107476635514018,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.8:5",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "164",
+                    "to": "164"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.8:6",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "168",
+                    "to": "168"
+                }
+            ]
+        },
+        "similarity": 0.9971751412429378,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.9:11",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "177",
+                    "to": "178"
+                }
+            ]
+        },
+        "similarity": 0.9861751152073732,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.9:11",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "185",
+                    "to": "186"
+                }
+            ]
+        },
+        "similarity": 0.9861751152073732,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.9:4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "193",
+                    "to": "194"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4800",
+            "section": "7.6.1.9:7",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/cast.k",
+            "lines": [
+                {
+                    "from": "200",
+                    "to": "201"
+                }
+            ]
+        },
+        "similarity": 0.7828054298642534,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "9.4.3:5.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/reference.k",
+            "lines": [
+                {
+                    "from": "29",
+                    "to": "33"
+                },
+                {
+                    "from": "42",
+                    "to": "46"
+                },
+                {
+                    "from": "53",
+                    "to": "58"
+                },
+                {
+                    "from": "67",
+                    "to": "69"
+                },
+                {
+                    "from": "72",
+                    "to": "75"
+                },
+                {
+                    "from": "79",
+                    "to": "88"
+                },
+                {
+                    "from": "91",
+                    "to": "94"
+                }
+            ]
+        },
+        "similarity": 0.8253968253968254,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.2.7:24",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/new.k",
+            "lines": [
+                {
+                    "from": "114",
+                    "to": "120"
+                }
+            ]
+        },
+        "similarity": 0.9001447178002895,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4778",
+            "section": "7.6.2.7:24",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/translation/expr/new.k",
+            "lines": [
+                {
+                    "from": "115",
+                    "to": "120"
+                }
+            ]
+        },
+        "similarity": 0.9038737446197992,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4820",
+            "section": "9.4.3:4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/common/reference.k",
+            "lines": [
+                {
+                    "from": "23",
+                    "to": "23"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.10:4.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/common/expr/relational.k",
+            "lines": [
+                {
+                    "from": "27",
+                    "to": "27"
+                }
+            ]
+        },
+        "similarity": 0.9841269841269841,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.10:4.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/common/expr/relational.k",
+            "lines": [
+                {
+                    "from": "27",
+                    "to": "27"
+                }
+            ]
+        },
+        "similarity": 0.9853658536585366,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.10:4.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/common/expr/relational.k",
+            "lines": [
+                {
+                    "from": "56",
+                    "to": "56"
+                }
+            ]
+        },
+        "similarity": 0.9841269841269841,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "7.6.10:4.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/common/expr/relational.k",
+            "lines": [
+                {
+                    "from": "56",
+                    "to": "56"
+                }
+            ]
+        },
+        "similarity": 0.9853658536585366,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "15.1/4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/execution/stmt/try.k",
+            "lines": [
+                {
+                    "from": "199",
+                    "to": "199"
+                }
+            ]
+        },
+        "error": "Failed to locate referenced paragraph in target revision (n4861) chapter 14.2"
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "14.4:3.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/execution/stmt/try.k",
+            "lines": [
+                {
+                    "from": "244",
+                    "to": "244"
+                }
+            ]
+        },
+        "similarity": 1.0,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "14.4:3.2",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/execution/stmt/try.k",
+            "lines": [
+                {
+                    "from": "251",
+                    "to": "251"
+                }
+            ]
+        },
+        "similarity": 0.9947643979057592,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "14.4:3.3.1",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/execution/stmt/try.k",
+            "lines": [
+                {
+                    "from": "258",
+                    "to": "258"
+                }
+            ]
+        },
+        "similarity": 0.9694656488549618,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "14.4:3.3.3",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/execution/stmt/try.k",
+            "lines": [
+                {
+                    "from": "275",
+                    "to": "275"
+                }
+            ]
+        },
+        "similarity": 0.8888888888888888,
+        "error": ""
+    },
+    {
+        "document": {
+            "document": "n4296",
+            "section": "14.4:3.4",
+            "TODO": "false"
+        },
+        "semantics": {
+            "file": "c-semantics/semantics/cpp/language/execution/stmt/try.k",
+            "lines": [
+                {
+                    "from": "284",
+                    "to": "284"
+                }
+            ]
+        },
+        "similarity": 0.8888888888888888,
+        "error": ""
+    }
+]

@@ -16,8 +16,9 @@ def append_new_tag(soup, script_tag, src=None, string=""):
         new_tag.string = string
 
 
-def append_tags_to_index_html(script_tag):
-    directory = os.getcwd()
+def append_tags_to_index_html(script_tag, directory):
+    if not directory:
+        directory = os.getcwd()
     fname = os.path.join(directory, "index.html")
     print("appending to index")
 
@@ -31,8 +32,9 @@ def append_tags_to_index_html(script_tag):
         f.write(str(soup))
 
 
-def append_tags_to_html_files(script_tag):
-    directory = os.getcwd()
+def append_tags_to_html_files(script_tag, directory):
+    if not directory:
+        directory = os.getcwd()
     html_page_exceptions = ['index.html']
 
     for filename in os.listdir(directory):
@@ -51,9 +53,13 @@ def append_tags_to_html_files(script_tag):
 
 def main(argv):
     script_tag = 'script'
+    if len(argv) > 1:
+        path = argv[1]
+    else:
+        path = ""
 
-    append_tags_to_index_html(script_tag)
-    append_tags_to_html_files(script_tag)
+    append_tags_to_index_html(script_tag, path)
+    append_tags_to_html_files(script_tag, path)
 
 
 if __name__ == "__main__":

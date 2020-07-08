@@ -30,7 +30,7 @@
     function fetchFiles() {
         if(sessionStorage.getItem("references") === null){
             jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
-                "Bachelor-Thesis/master/project/JS/references_mapped_n4820.json",
+                "Bachelor-Thesis/master/project/JS/references_mapped_n4861.json",
                 function(data) {
                     sessionStorage.setItem("references", data);
                 });
@@ -39,7 +39,7 @@
         if(sessionStorage.getItem("dictionary") === null){
             jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
                 "Bachelor-Thesis/master/project/JS/section_names_" +
-                "n4820.txt",
+                "n4861.txt",
                 function(data) {
                     sessionStorage.setItem("dictionary",
                         JSON.stringify(processSectionNames(data)));
@@ -49,7 +49,7 @@
         if(sessionStorage.getItem("mapping") === null){
             jQuery.get("https://raw.githubusercontent.com/TomasLesicko/" +
                 "Bachelor-Thesis/master/project/JS/" +
-                "section_mapping_to_n4820.json",
+                "section_mapping_to_n4861.json",
                 function(data) {
                     sessionStorage.setItem("mapping", data);
                 });
