@@ -1,6 +1,6 @@
 # Bachelor-Thesis
 
-#####Introduction
+##### Introduction
 
 C++14 - mapping between the standard document and a 
 formal semantics
@@ -14,7 +14,7 @@ target revision are provided.
 Tested on Xubuntu 18.04
 
 
-#####Cloning
+##### Cloning
 
   Either:  
   git clone --recurse-submodules https://github.com/TomasLesicko/Bachelor-Thesis.git  
@@ -23,7 +23,7 @@ Tested on Xubuntu 18.04
   git submodule update --init --recursive  
 
 
-#####Prerequisites
+##### Prerequisites
 
   - Git
   - g++
@@ -41,7 +41,7 @@ Tested on Xubuntu 18.04
     https://github.com/Eelis/cxxdraft-htmlgen
 
 
-#####Tika server
+##### Tika server
 
 If running for the first time or when a new reference from a previously 
 unreferenced revision is added, the mapping has to generate new files, 
@@ -57,7 +57,7 @@ If all referenced revision .txt files were previously generated, there
 is no need to run tika server.
 
 
-#####Usage
+##### Usage
 
 To generate an annotated PDF revision, run mapping.sh in project directory,
 with port_number argument only being necessary if new .txt files have to
@@ -66,7 +66,7 @@ be generated:
   ./mapping.sh revision_tag [port_number]
 
 
-#####Output
+##### Output
 
   - annotated version of target revision in PDF format in project directory
   - referenceErrors.json in project/section_mapping, listing references that
@@ -76,7 +76,7 @@ be generated:
     automatically for any reason can still be added to the cache manually
 
 
-#####HTML
+##### HTML
 
 HTML versions first require HTML files of the revision, which can be
 generated using https://github.com/Eelis/cxxdraft-htmlgen, then they need 
