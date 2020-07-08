@@ -125,7 +125,7 @@ def find_referenced_paragraph_page(doc, page_number, toc_page_count, section, pa
 
     page = doc[toc_page_count + page_number - 1]
     blocks = page.getTextBlocks(flags=fitz.TEXT_INHIBIT_SPACES)
-    regex = re.compile(r"^(?:—\n\()?" + section[1] + r"\)?\n")
+    regex = re.compile(r"^(?:—\n\()?" + section[1] + r"\)?\n?(?!\d\))")
 
     for block in blocks:
         if chapter_start:
