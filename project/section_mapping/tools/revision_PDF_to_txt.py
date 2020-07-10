@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import re
 import os
@@ -31,19 +33,27 @@ def read_referenced_revisions(revision_set, port_num):
 
 
 def read_referenced_revision(revision_tag, port_num, save_to=""):
-    path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'draft/papers/',
+    """ Uses tika module to obtain a .txt version of a PDF
+    Requires tika server to run, and correct port number
+    as an argument.
+    """
+    path = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir,
+                        os.pardir, 'draft/papers/',
                         revision_tag.lower() + ".pdf")
     print("\tLoading %s.txt" % revision_tag)
+
     try:
         tika.TikaClientOnly = True
-        contents = parser.from_file(path, "http://localhost:" + port_num + "/")["content"]
+        contents = parser.from_file(path, "http://localhost:"
+                                    + port_num + "/")["content"]
         save_txt_revision(contents, revision_tag, save_to)
         return contents
     except FileNotFoundError as fnfe:
-        handle_error(fnfe, "[Error] Could not find revision %s.pdf in draft/papers" % revision_tag)
+        handle_error(fnfe, "[Error] Could not find revision %s.pdf in "
+                           "draft/papers" % revision_tag)
     except ConnectionError as ce:
-        handle_error(ce, "[Error] Wrong port number: %s, make sure tika server is running "
-                         "with correct port number" % port_num)
+        handle_error(ce, "[Error] Wrong port number: %s, make sure tika server"
+                         " is running with correct port number" % port_num)
 
 
 def main(argv):
