@@ -1,0 +1,56 @@
+Project structure:
+
+c-semantics - git submodule containing semantics files
+    (https://github.com/kframework/c-semantics)
+
+draft - git submodule containing C++ draft files
+    (https://github.com/cplusplus/draft)
+
+cxxdraft-htmlgen - git submodule containing the C++ draft HTML generator 
+    (https://github.com/Eelis/cxxdraft-htmlgen)
+
+README.md - user guide, read on how to install and use the mapping correctly
+
+project - directory containing the implementation of the mapping - our own work
+    requirements.txt - used by pip for easy library installation (see README for details)
+
+    mapping.sh - the main script that is executed to create an annotated target revision PDF
+
+    nxxxx_annotated.pdf - main output, a revision PDF with highlighted/annotated sections
+
+    tika_server/download_tika.sh - the script which downloads tika server so that the server
+        file does not increase Git repository size. The server file is included in the .zip
+        uploaded to the archive, however.
+
+    section_mapping - contains files related to the mapping (some files may not be present in the
+        .zip file, but are generated locally when mapping.sh is executed):
+
+        annotatePDF.py - highlights and annotates references sections in target PDF
+        chapter_extractor.py - extracts names and identifiers of each referenced revision
+        chapter_mapping.py - maps chapters between revisions
+        paragraph_mapping.py - where the mapping, coverage and cache are created
+        referenceErrors.json - contains references that could not be mapped
+        referenceExtractor.cpp - extracts references from the semantics
+        references.json - unmapped references extracted by referenceExtractor.cpp
+        references_mapped_nxxxx.json - mapped references to a specific revision
+        section_mapping_to_nxxxx.json - mapped chapters created by chapter_mapping.py
+        section_names_nxxxx.txt - extracted names and identifiers created by chapter_extractor.py
+        
+        cache - contains mapping cache, so same references don't have to be mapped in the future,
+            also allows for manual entry if desired.
+            mapping_cache_nxxxx.json - cache files for specific revisions
+            revision_dict_nxxxx.json - parsed revisions, saved locally, so the process does not have
+                to be repeated for same revision in the future
+
+        tools - contains tools, currently a script that converts PDF revisions to txt, and its output
+            nxxxx.txt - a text version of a specific revision
+            revision_PDF_to_txt.py - a script that converts PDF revisions to text
+
+    JS - contains files necessary to create annotated HTML revisions
+         files located here are the same as some generated files in section_mapping, however these
+         are uploaded to Git, most section_mapping files are ignored to keep the Git repository small
+        
+        append_script_tags_to_HTML.py - appends necessary tags to the large amount of HTML files generated
+            by the HTML generator
+        processRefs.js - loads necessary files from Git repository when main page is loaded
+        script.js - highlights referenced sections on current HTML page, if any exist
